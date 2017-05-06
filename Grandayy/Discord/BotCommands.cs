@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Grandayy.Discord {
     class CommandModule : ModuleBase {
         
-        [Command("nsfw", RunMode = RunMode.Async), Alias("nfsw"), Summary("Give yourself or others access to the NSFW channel")]
+        [Command("nsfw", RunMode = RunMode.Async), Summary("Give yourself or others access to the NSFW channel")]
         public async Task NSFW(IUser user = null) {
             SocketGuildUser sender = (Context.User as SocketGuildUser);
             SocketGuildUser changinguser = (user ?? Context.User) as SocketGuildUser;
@@ -44,11 +44,6 @@ namespace Grandayy.Discord {
             }
         }
 
-        [Command("feedback", RunMode = RunMode.Async), Alias("f"), Summary("Get link to the feedback form")]
-        public async Task Feedback() {
-            await Context.Channel.SendMessageAsync("https://goo.gl/forms/hzmuOE9PsE9Dh1ax1");
-        }
-
         /// <summary>
         /// All Commands
         /// </summary>
@@ -60,7 +55,7 @@ namespace Grandayy.Discord {
 
             //  Embed
             var builder = new EmbedBuilder() {
-                Title = $"Commands availible to {Context.Message.Author.Username}",
+                Title = $"Commands available to {Context.Message.Author.Username}",
                 Description = "\n",
                 Color = new Color((int) MsgLevel.Good),
                 Timestamp = DateTimeOffset.UtcNow

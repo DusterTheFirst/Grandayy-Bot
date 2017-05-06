@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -24,6 +23,7 @@ namespace Grandayy {
     class Program {
 
         public static CommandService commands;
+        public static CommandService DMcommands;
         private static DiscordSocketClient client;
         private static DependencyMap map;
 
@@ -31,7 +31,6 @@ namespace Grandayy {
         public static ConfigManager ConfigManager;
 
         public static SocketTextChannel AnnouncementsChannel;
-        public static SocketTextChannel LogChannel;
         public static SocketTextChannel CommandChannel;
 
         Tweetinvi.Models.IUser Grandayy;
@@ -41,7 +40,7 @@ namespace Grandayy {
             new Program().MainAsync().GetAwaiter().GetResult();
 
         public async Task MainAsync() {
-            File.WriteAllText("console.log", "");
+            //File.WriteAllText("console.log", "");
 
             ConfigManager = new ConfigManager();
 
@@ -55,6 +54,7 @@ namespace Grandayy {
             client = new DiscordSocketClient();
             map = new DependencyMap();
             commands = new CommandService();
+            DMcommands = new CommandService();
 
             client.Log += Log;
             client.Ready += Ready;
@@ -94,25 +94,33 @@ namespace Grandayy {
             Auth.SetUserCredentials(Config.TwitterAPI.ConsumerKey, Config.TwitterAPI.ConsumerSecret, Config.TwitterAPI.UserAccessToken, Config.TwitterAPI.UserAccessSeceret);
 
             AnnouncementsChannel = (client.GetChannel(Config.Channels.AnnouncementsChannel) as SocketTextChannel);
-            LogChannel = (client.GetChannel(Config.Channels.AuditLogChannel) as SocketTextChannel);
             CommandChannel = (client.GetChannel(Config.Channels.CommandChannel) as SocketTextChannel);
 
-            client.SetGameAsync("/help for help");
+            client.SetGameAsync($"{Config.CommandPrefix}help for help");
 
             Warn("Bot restarted. Bot crashed or updated");
 
-            var timer = new System.Timers.Timer(Config.SocialTick) {
-                Enabled = true
-            };
-            timer.Elapsed += async (sender, args) => {
+            var timer = new System.Threading.Timer(async (a) => {
                 try {
                     await TwitterTick();
                     await YoutubeTick();
                 } catch (Exception e) {
-                    await Audit($"FAILED TO UPDATE SOCIAL MEDIA, {e.Message}", MsgLevel.Error);
+                    Audit($"FAILED TO UPDATE SOCIAL MEDIA, {e.Message}", MsgLevel.Error);
                 }
-            };
-            timer.Start();
+            }, null, 0, Config.SocialTick);
+
+            //var timer = new System.Timers.Timer(Config.SocialTick) {
+            //    Enabled = true
+            //};
+            //timer.Elapsed += async (sender, args) => {
+            //    try {
+            //        await TwitterTick();
+            //        await YoutubeTick();
+            //    } catch (Exception e) {
+            //        Audit($"FAILED TO UPDATE SOCIAL MEDIA, {e.Message}", MsgLevel.Error);
+            //    }
+            //};
+            //timer.Start();
 
             return Task.CompletedTask;
         }
@@ -133,7 +141,6 @@ namespace Grandayy {
                         Color = new Color(66, 134, 244)
                     });
                     Log($"{Grandayy.Name} posted {t.Text}");
-                    await Audit($"{Grandayy.Name} posted {t.Text}", MsgLevel.Good);
                 }
             }
 
@@ -142,7 +149,6 @@ namespace Grandayy {
             foreach (KeyValuePair<string, string> p in Config.YoutubeAccounts) {
                 await AlertVid(p.Key, p.Value);
             }
-
         }
 
         public async Task AlertVid(string channelname, string id) {
@@ -162,7 +168,6 @@ namespace Grandayy {
                     // Print information about each video.
                     if (playlistItem.Snippet.PublishedAt.Value.ToUniversalTime() > DateTime.UtcNow.AddMilliseconds(-Config.SocialTick)) {
                         Log($"New Video By {channelname}, {playlistItem.Snippet.Title}");
-                        await Audit($"New video by {channelname}, {playlistItem.Snippet.Title}", MsgLevel.Good);
 
                         await AnnouncementsChannel.SendMessageAsync($"@everyone, {channelname} has a new piece of art to share with you mortals\nhttps://www.youtube.com/watch?v={playlistItem.Snippet.ResourceId.VideoId}");
                     }
@@ -177,6 +182,9 @@ namespace Grandayy {
             // Discover all of the commands in this assembly and load them.
             await commands.AddModuleAsync<CommandModule>();
 
+            await DMcommands.AddModuleAsync<DMModule>();
+
+            Log("Avaliable DMCommands:" + string.Join(", ", DMcommands.Commands.Select(x => x.Name)));
             Log("Avaliable Commands:" + string.Join(", ", commands.Commands.Select(x => x.Name)));
 
         }
@@ -184,15 +192,22 @@ namespace Grandayy {
             // Don't process the command if it was a System Message
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
+
+            if (message.Channel is IDMChannel) {
+                await HandleDM(message);
+                return;
+            }
+
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
             // Determine if the message is a command, based on if it starts with '!' or a mention prefix
-            if (!(message.HasCharPrefix(Config.CommandPrefix, ref argPos) || message.HasMentionPrefix(client.CurrentUser, ref argPos))) return;
-
+            if (!message.HasCharPrefix(Config.CommandPrefix, ref argPos)) return;
             if (message.Author.IsBot) return;
 
+            //if (Limiter.IsRatelimited(message.Author)) return;
+
             Log($"User {message.Author.Username} Executed {message.Content}");
-            await Audit($"User {message.Author.Mention} executed {message.Content}", MsgLevel.Good, message.Author as SocketGuildUser);
+            Audit($"User {message.Author.Mention} executed {message.Content}", MsgLevel.Good, message.Author as SocketGuildUser);
 
             await message.DeleteAsync();
 
@@ -203,6 +218,7 @@ namespace Grandayy {
                 });
                 return;
             }
+
             // Create a Command Context
             var context = new CommandContext(client, message);
             // Execute the command. (result does not indicate a return value, 
@@ -222,32 +238,55 @@ namespace Grandayy {
                         break;
                 }
         }
+        private async Task HandleDM(SocketUserMessage message) {
+            if (message.Author.IsBot) return;
 
-        public static async Task Log(LogMessage m) {
+            if (!Config.DMWhitlist.Contains(message.Author.Id)) {
+                await message.Channel.SendMessageAsync("", false, new EmbedBuilder() {
+                    Title = "I only speak to my dads in DMS",
+                    Color = new Color((int) MsgLevel.Warn)
+                });
+                Log($"User {message.Author.Username}:{message.Author.Id} Attempted To DM {message.Content}");
+                return;
+            }
+            Log($"User {message.Author.Username} DMed {message.Content}");
+
+            // Create a Command Context
+            var context = new CommandContext(client, message);
+            // Execute the command. (result does not indicate a return value, 
+            // rather an object stating if the command executed succesfully)
+            var result = await DMcommands.ExecuteAsync(context, 0, map);
+            if (!result.IsSuccess)
+                await context.Channel.SendMessageAsync($"{result.ErrorReason}");
+
+        }
+
+        public static Task Log(LogMessage m) {
             switch (m.Severity) {
                 case LogSeverity.Critical:
                     Log(m, ConsoleColor.DarkRed);
-                    await Audit(m, MsgLevel.Error);
+                    Audit(m, MsgLevel.Error);
                     break;
                 case LogSeverity.Debug:
                     Log(m, ConsoleColor.Gray);
                     break;
                 case LogSeverity.Error:
                     Log(m, ConsoleColor.Red);
-                    await Audit(m, MsgLevel.Error);
+                    Audit(m, MsgLevel.Error);
                     break;
                 case LogSeverity.Info:
                     Log(m, ConsoleColor.White);
                     break;
                 case LogSeverity.Verbose:
                     Log(m, ConsoleColor.DarkYellow);
-                    await Audit(m, MsgLevel.Warn);
+                    Audit(m, MsgLevel.Warn);
                     break;
                 case LogSeverity.Warning:
                     Log(m, ConsoleColor.Yellow);
-                    await Audit(m, MsgLevel.Warn);
+                    Audit(m, MsgLevel.Warn);
                     break;
             }
+            return Task.CompletedTask;
         }
         public static void Log(LogMessage m, ConsoleColor c) => Log($"[{m.Severity}][{m.Source}] {m.Message}{m.Exception}", c);
         public static void Log(object message, ConsoleColor color = ConsoleColor.White, ConsoleColor highlight = ConsoleColor.Black) {
@@ -257,39 +296,43 @@ namespace Grandayy {
             Console.ForegroundColor = color;
             Console.BackgroundColor = highlight;
 
-            File.WriteAllText("console.log", File.ReadAllText("console.log") + $"\r\n[{DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()}]{message}");
+            Audit(message, MsgLevel.Good);
             Console.WriteLine($"[{DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()}]{message}");
 
             Console.ForegroundColor = priorf;
             Console.BackgroundColor = priorb;
         }
 
-        public static async void Error(object message) {
+        public static void Error(object message) {
             Log($"[Error][Bot] {message}", ConsoleColor.Red);
-            await Audit(message, MsgLevel.Error);
+            Audit(message, MsgLevel.Error);
         }
-        public static async void Warn(object message) {
+        public static void Warn(object message) {
             Log($"[Warn][Bot] {message}", ConsoleColor.Yellow);
-            await Audit(message, MsgLevel.Warn);
+            Audit(message, MsgLevel.Warn);
         }
 
-        public static async Task Audit(object message, MsgLevel level, SocketGuildUser user = null) {
-            try {
-                string msg = "";
-                if (level != MsgLevel.Good) msg = "<@168827261682843648>";
-                await LogChannel.SendMessageAsync(msg, false, new EmbedBuilder() {
-                    Footer = new EmbedFooterBuilder() {
-                        IconUrl = client.CurrentUser.GetAvatarUrl(),
-                        Text = client.CurrentUser.Username
-                    },
-                    ThumbnailUrl = user?.GetAvatarUrl(),
-                    Description = message.ToString(),
-                    Timestamp = DateTime.UtcNow,
-                    Color = new Color((uint) level)
-                });
-            } catch {
+        [Obsolete]
+        public static void Audit(object message, MsgLevel level, SocketGuildUser user = null) {
+            //Task.Run(async () => {
+            //    try {
+            //        string msg = "";
+            //        if (level != MsgLevel.Good) msg = "<@168827261682843648>";
+            //        await LogChannel.SendMessageAsync(msg, false, new EmbedBuilder() {
+            //            Footer = new EmbedFooterBuilder() {
+            //                IconUrl = client.CurrentUser.GetAvatarUrl(),
+            //                Text = client.CurrentUser.Username
+            //            },
+            //            ThumbnailUrl = user?.GetAvatarUrl(),
+            //            Description = message.ToString(),
+            //            Timestamp = DateTime.UtcNow,
+            //            Color = new Color((uint) level)
+            //        });
+            //    } catch {
 
-            }
+            //    }
+            //});
+            /// TODO: LOG TO DATABASE FOR CHECK LATER (DM ONLY)
         }
 
     }

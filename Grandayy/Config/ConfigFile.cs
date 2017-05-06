@@ -12,6 +12,12 @@ namespace Grandayy.Config {
         [JsonProperty("command_prefix")]
         public char CommandPrefix { get; set; }
 
+        [JsonProperty("server_id")]
+        public ulong ServerID { get; set; }
+
+        [JsonProperty("dm_whitelist")]
+        public List<ulong> DMWhitlist { get; set; }
+
         [JsonProperty("channel_ids")]
         public SpecialChannels Channels { get; set; }
         
@@ -32,6 +38,10 @@ namespace Grandayy.Config {
             BotToken = "";
             CommandPrefix = '/';
 
+            ServerID = 0;
+
+            DMWhitlist = new List<ulong>();
+
             Channels = new SpecialChannels();
 
             TwitterAccout = 0;
@@ -47,8 +57,6 @@ namespace Grandayy.Config {
     public class SpecialChannels {
         [JsonProperty("announcements")]
         public ulong AnnouncementsChannel { get; set; }
-        [JsonProperty("audit")]
-        public ulong AuditLogChannel { get; set; }
         [JsonProperty("commands")]
         public ulong CommandChannel { get; set; }
     }
