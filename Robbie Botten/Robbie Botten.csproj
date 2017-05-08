@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.0-preview1-002028-00</RuntimeFrameworkVersion>
+    <RuntimeIdentifiers>win;win10-arm</RuntimeIdentifiers>
+    <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>
+    <RootNamespace>RobbieBotten</RootNamespace>
+    <ApplicationIcon>robbieagain.ico</ApplicationIcon>
+    <AssemblyName>RobbieBotten</AssemblyName>
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="config.json" />
+    <None Remove="Console.log" />
+    <None Remove="publish.bat" />
+    <None Remove="restore 64.bat" />
+    <None Remove="restore.bat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="1.0.0-rc2-00736" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+  </ItemGroup>
+
+</Project>

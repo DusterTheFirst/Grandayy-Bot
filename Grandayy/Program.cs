@@ -98,60 +98,48 @@ namespace Grandayy {
 
             client.SetGameAsync($"{Config.CommandPrefix}help for help");
 
-            Warn("Bot restarted. Bot crashed or updated");
-
-            var timer = new System.Threading.Timer(async (a) => {
+            var timer = new System.Timers.Timer(Config.SocialTick) {
+                Enabled = true
+            };
+            timer.Elapsed += async (sender, args) => {
                 try {
-                    await TwitterTick();
-                    await YoutubeTick();
-                } catch (Exception e) {
-                    Audit($"FAILED TO UPDATE SOCIAL MEDIA, {e.Message}", MsgLevel.Error);
+                    await TwitterTick(args.SignalTime.Millisecond);
+                    await YoutubeTick(args.SignalTime.Millisecond);
+                } catch (Exception e) { 
+                    Log($"FAILED TO UPDATE SOCIAL MEDIA, {e.Message}");
                 }
-            }, null, 0, Config.SocialTick);
-
-            //var timer = new System.Timers.Timer(Config.SocialTick) {
-            //    Enabled = true
-            //};
-            //timer.Elapsed += async (sender, args) => {
-            //    try {
-            //        await TwitterTick();
-            //        await YoutubeTick();
-            //    } catch (Exception e) {
-            //        Audit($"FAILED TO UPDATE SOCIAL MEDIA, {e.Message}", MsgLevel.Error);
-            //    }
-            //};
-            //timer.Start();
+                //Log("Checked Social Media");
+            };
+            timer.Start();
 
             return Task.CompletedTask;
         }
 
-        public async Task TwitterTick() {
+        public async Task TwitterTick(int Elapsed) {
             if (Grandayy == null) Grandayy = User.GetUserFromId(Config.TwitterAccout);
 
             GrandayyTimeline = Timeline.GetUserTimeline(Grandayy.Id, 10);
 
-            foreach (ITweet t in GrandayyTimeline) {
-                if (t.CreatedAt.ToUniversalTime() > DateTime.UtcNow.AddMilliseconds(-Config.SocialTick)) {
-                    await AnnouncementsChannel.SendMessageAsync("", false, new EmbedBuilder() {
-                        Url = t.Url,
-                        Description = t.Text,
-                        Timestamp = t.CreatedAt.ToUniversalTime(),
-                        ThumbnailUrl = Grandayy.ProfileImageUrl400x400,
-                        Title = $"{Grandayy.Name} has a message for his disciples",
-                        Color = new Color(66, 134, 244)
-                    });
-                    Log($"{Grandayy.Name} posted {t.Text}");
-                }
+            foreach (ITweet t in GrandayyTimeline.Where(t => t.CreatedAt.ToUniversalTime() > DateTime.UtcNow.AddMilliseconds(-Elapsed))) {
+                await AnnouncementsChannel.SendMessageAsync("", false, new EmbedBuilder() {
+                    Url = t.Url,
+                    Description = t.Text,
+                    Timestamp = t.CreatedAt.ToUniversalTime(),
+                    ThumbnailUrl = Grandayy.ProfileImageUrl400x400,
+                    Title = $"{Grandayy.Name} has a message for his disciples",
+                    Color = new Color(66, 134, 244)
+                });
+                Log($"{Grandayy.Name} posted {t.Text}");
             }
 
         }
-        public async Task YoutubeTick() {
+        public async Task YoutubeTick(int elapsed) {
             foreach (KeyValuePair<string, string> p in Config.YoutubeAccounts) {
-                await AlertVid(p.Key, p.Value);
+                await AlertVid(p.Key, p.Value, elapsed);
             }
         }
 
-        public async Task AlertVid(string channelname, string id) {
+        public async Task AlertVid(string channelname, string id, int elapsed) {
             var yt = new YouTubeService(new BaseClientService.Initializer() { ApiKey = Config.YoutubeAPI.APIKey });
             var channelsListRequest = yt.Channels.List("contentDetails");
             channelsListRequest.Id = id;
@@ -161,12 +149,12 @@ namespace Grandayy {
                 var uploadsListId = channel.ContentDetails.RelatedPlaylists.Uploads;
                 var playlistItemsListRequest = yt.PlaylistItems.List("snippet");
                 playlistItemsListRequest.PlaylistId = uploadsListId;
-                playlistItemsListRequest.MaxResults = 50;
+                playlistItemsListRequest.MaxResults = 5;
                 // Retrieve the list of videos uploaded to the authenticated user's channel.
                 var playlistItemsListResponse = playlistItemsListRequest.Execute();
                 foreach (var playlistItem in playlistItemsListResponse.Items) {
                     // Print information about each video.
-                    if (playlistItem.Snippet.PublishedAt.Value.ToUniversalTime() > DateTime.UtcNow.AddMilliseconds(-Config.SocialTick)) {
+                    if (playlistItem.Snippet.PublishedAt.Value.ToUniversalTime() > DateTime.UtcNow.AddMilliseconds(-elapsed)) {
                         Log($"New Video By {channelname}, {playlistItem.Snippet.Title}");
 
                         await AnnouncementsChannel.SendMessageAsync($"@everyone, {channelname} has a new piece of art to share with you mortals\nhttps://www.youtube.com/watch?v={playlistItem.Snippet.ResourceId.VideoId}");
@@ -207,7 +195,6 @@ namespace Grandayy {
             //if (Limiter.IsRatelimited(message.Author)) return;
 
             Log($"User {message.Author.Username} Executed {message.Content}");
-            Audit($"User {message.Author.Mention} executed {message.Content}", MsgLevel.Good, message.Author as SocketGuildUser);
 
             await message.DeleteAsync();
 
@@ -243,13 +230,13 @@ namespace Grandayy {
 
             if (!Config.DMWhitlist.Contains(message.Author.Id)) {
                 await message.Channel.SendMessageAsync("", false, new EmbedBuilder() {
-                    Title = "I only speak to my dads in DMS",
+                    Title = "STRANGER DANGER",
                     Color = new Color((int) MsgLevel.Warn)
                 });
-                Log($"User {message.Author.Username}:{message.Author.Id} Attempted To DM {message.Content}");
+                Log($"User {message.Author.Username} Attempted To DM '{message.Content}'");
                 return;
             }
-            Log($"User {message.Author.Username} DMed {message.Content}");
+            Log($"User {message.Author.Username} DMed '{message.Content}'");
 
             // Create a Command Context
             var context = new CommandContext(client, message);
@@ -265,25 +252,21 @@ namespace Grandayy {
             switch (m.Severity) {
                 case LogSeverity.Critical:
                     Log(m, ConsoleColor.DarkRed);
-                    Audit(m, MsgLevel.Error);
                     break;
                 case LogSeverity.Debug:
                     Log(m, ConsoleColor.Gray);
                     break;
                 case LogSeverity.Error:
                     Log(m, ConsoleColor.Red);
-                    Audit(m, MsgLevel.Error);
                     break;
                 case LogSeverity.Info:
                     Log(m, ConsoleColor.White);
                     break;
                 case LogSeverity.Verbose:
                     Log(m, ConsoleColor.DarkYellow);
-                    Audit(m, MsgLevel.Warn);
                     break;
                 case LogSeverity.Warning:
                     Log(m, ConsoleColor.Yellow);
-                    Audit(m, MsgLevel.Warn);
                     break;
             }
             return Task.CompletedTask;
@@ -296,7 +279,6 @@ namespace Grandayy {
             Console.ForegroundColor = color;
             Console.BackgroundColor = highlight;
 
-            Audit(message, MsgLevel.Good);
             Console.WriteLine($"[{DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()}]{message}");
 
             Console.ForegroundColor = priorf;
@@ -305,11 +287,9 @@ namespace Grandayy {
 
         public static void Error(object message) {
             Log($"[Error][Bot] {message}", ConsoleColor.Red);
-            Audit(message, MsgLevel.Error);
         }
         public static void Warn(object message) {
             Log($"[Warn][Bot] {message}", ConsoleColor.Yellow);
-            Audit(message, MsgLevel.Warn);
         }
 
         [Obsolete]
