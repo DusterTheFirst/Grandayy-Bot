@@ -36,7 +36,7 @@ namespace RobbieBotten.Config {
 
         public ConfigFile() {
             BotToken = "";
-            CommandPrefix = '/';
+            CommandPrefix = '>';
 
             ServerID = 0;
 
