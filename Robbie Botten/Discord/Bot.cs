@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using RobbieBotten.Discord.Commands;
 
 namespace RobbieBotten.Discord {
     public class Bot {
@@ -13,6 +14,8 @@ namespace RobbieBotten.Discord {
 
         ConfigFile config;
         private ConfigManager configmanager;
+
+        Commands.Commands commandhandler;
 
         public Bot() {
             configmanager = new ConfigManager();
@@ -23,6 +26,7 @@ namespace RobbieBotten.Discord {
             };
 
             config = configmanager.Load();
+            commandhandler = new Commands.Commands(config, client);
 
             Logger.Warn("BOT IS IN EARLY DEVELOPMENT");
             Logger.Warn("3");
@@ -34,11 +38,17 @@ namespace RobbieBotten.Discord {
             client = new DiscordSocketClient();
 
             client.Log += Logger.Log;
+            client.Ready += Ready;
+            client.MessageReceived += commandhandler.Handle;
 
             await client.LoginAsync(TokenType.Bot, config.BotToken);
             await client.StartAsync();
 
             await Task.Delay(-1);
+        }
+
+        public async Task Ready() {
+
         }
     }
 }
