@@ -26,7 +26,6 @@ namespace RobbieBotten.Discord {
             };
 
             config = configmanager.Load();
-            commandhandler = new Commands.Commands(config, client);
 
             Logger.Warn("BOT IS IN EARLY DEVELOPMENT");
             Logger.Warn("3");
@@ -36,6 +35,10 @@ namespace RobbieBotten.Discord {
 
         public async Task Start() {
             client = new DiscordSocketClient();
+
+            commandhandler = new Commands.Commands(config, client);
+
+            await commandhandler.Install();
 
             client.Log += Logger.Log;
             client.Ready += Ready;
@@ -48,7 +51,7 @@ namespace RobbieBotten.Discord {
         }
 
         public async Task Ready() {
-
+            await client.SetGameAsync($"{config.CommandPrefix}");
         }
     }
 }

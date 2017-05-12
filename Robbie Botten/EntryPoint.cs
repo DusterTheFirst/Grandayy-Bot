@@ -14,7 +14,7 @@ namespace RobbieBotten {
             try {
                 bot.Start().GetAwaiter().GetResult();
             } catch (Exception e) {
-                Logger.Error(e.Message);
+                Logger.Error(e);
             }
             Logger.Warn("Press any key to continue...");
             Console.ReadKey();

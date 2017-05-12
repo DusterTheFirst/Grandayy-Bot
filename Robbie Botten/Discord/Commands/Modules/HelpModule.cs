@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using RobbieBotten.Config;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace RobbieBotten.Discord.Commands.Modules {
         [Command("help", RunMode = RunMode.Async), Alias("?"), Summary("List all commands availible to you")]
         public async Task HelpAsync() {
             //  Prefix
-            string prefix = Config.CommandPrefix.ToString();
+            string prefix = Context.Message.Content.First() == Config.CommandPrefix ? Config.CommandPrefix.ToString() : "";
 
             //  Embed
             var builder = new EmbedBuilder() {
@@ -71,7 +72,7 @@ namespace RobbieBotten.Discord.Commands.Modules {
             if (!result.IsSuccess) {
                 builder.Color = new Color((int) MsgLevel.Error);
                 builder.Title = $"Command **{command}**, not found";
-                builder.Description = $"*Type {Config.CommandPrefix.ToString()}help for all commands*";
+                builder.Description = $"*Type {(Context.Message.Content.First() == Config.CommandPrefix ? Config.CommandPrefix.ToString() : "")}help for all commands*";
             } else {
                 //  Adds Field For Each Command Found
                 foreach (var match in result.Commands) {
