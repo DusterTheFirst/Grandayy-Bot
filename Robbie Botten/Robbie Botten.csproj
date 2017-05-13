@@ -23,6 +23,7 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.0-rc2-00736" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="TweetinviAPI" Version="1.2.0.1" />
   </ItemGroup>
 
 </Project>

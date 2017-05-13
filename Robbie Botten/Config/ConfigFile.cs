@@ -21,8 +21,8 @@ namespace RobbieBotten.Config {
         [JsonProperty("channel_ids")]
         public SpecialChannels Channels { get; set; }
         
-        [JsonProperty("twitter_account")]
-        public long TwitterAccout { get; set; }
+        [JsonProperty("twitter_accounts")]
+        public List<long> TwitterAccouts { get; set; }
         [JsonProperty("youtube_accounts")]
         public Dictionary<string, string> YoutubeAccounts { get; set; }
 
@@ -44,7 +44,7 @@ namespace RobbieBotten.Config {
 
             Channels = new SpecialChannels();
 
-            TwitterAccout = 0;
+            TwitterAccouts = new List<long>();
             YoutubeAccounts = new Dictionary<string, string>();
 
             SocialTick = 15000;

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using RobbieBotten.Discord.Commands;
+using RobbieBotten.SocialMedia;
+using Tweetinvi;
 
 namespace RobbieBotten.Discord {
     public class Bot {
@@ -15,7 +17,9 @@ namespace RobbieBotten.Discord {
         ConfigFile config;
         private ConfigManager configmanager;
 
-        Commands.Commands commandhandler;
+        CommandHandler commandhandler;
+
+        List<Twitter> twitteraccounts = new List<Twitter>();
 
         public Bot() {
             configmanager = new ConfigManager();
@@ -36,7 +40,7 @@ namespace RobbieBotten.Discord {
         public async Task Start() {
             client = new DiscordSocketClient();
 
-            commandhandler = new Commands.Commands(config, client);
+            commandhandler = new CommandHandler(config, client);
 
             await commandhandler.Install();
 
@@ -51,7 +55,15 @@ namespace RobbieBotten.Discord {
         }
 
         public async Task Ready() {
-            await client.SetGameAsync($"{config.CommandPrefix}");
+            await client.SetGameAsync($"{config.CommandPrefix}help");
+
+            var SocialMedia = client.GetChannel(config.Channels.AnnouncementsChannel) as SocketTextChannel;
+
+            Auth.SetUserCredentials(config.TwitterAPI.ConsumerKey, config.TwitterAPI.ConsumerSecret, config.TwitterAPI.UserAccessToken, config.TwitterAPI.UserAccessSeceret);
+
+            foreach (long p in config.TwitterAccouts) {
+                twitteraccounts.Add(new Twitter(config, SocialMedia, p));
+            }
         }
     }
 }

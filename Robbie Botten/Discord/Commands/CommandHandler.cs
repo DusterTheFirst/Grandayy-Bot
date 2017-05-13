@@ -12,7 +12,7 @@ using RobbieBotten.Util;
 using System.Linq;
 
 namespace RobbieBotten.Discord.Commands {
-    public class Commands {
+    public class CommandHandler {
         public ConfigFile config;
         private DiscordSocketClient client;
 
@@ -20,7 +20,7 @@ namespace RobbieBotten.Discord.Commands {
         private CommandService PrefixedCommands;
         private CommandService NonprefixedCommands;
 
-        public Commands(ConfigFile config, DiscordSocketClient client) {
+        public CommandHandler(ConfigFile config, DiscordSocketClient client) {
             this.config = config;
             this.client = client;
 
