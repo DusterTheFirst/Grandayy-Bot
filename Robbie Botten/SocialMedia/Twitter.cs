@@ -11,7 +11,6 @@ using System.Threading;
 using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Models.DTO;
-using Tweetinvi.Parameters;
 
 namespace RobbieBotten.SocialMedia {
     public class Twitter {
@@ -39,17 +38,20 @@ namespace RobbieBotten.SocialMedia {
             foreach(ITweet tweet in tweets) {
                 IExtendedTweet extweet = tweet.ExtendedTweet;
 
-                var handlesreplaced = Regex.Replace(tweet.Text, "@([A-Za-z]+[A-Za-z0-9]+)", m =>
+                var replaced = Regex.Replace(tweet.Text, "@([A-Za-z]+[A-Za-z0-9]+)", m =>
                     $"[{m.Value}](https://twitter.com/{m.Value.Replace("@", "")})");
 
-                Logger.Log($"[Twitter Handler:{user.ScreenName}] New Tweet, {handlesreplaced}");
+                replaced = Regex.Replace(replaced, "#([A-Za-z]+[A-Za-z0-9]+)", m =>
+                    $"[{m.Value}](https://twitter.com/hashtag/{m.Value.Replace("#", "")})");
+
+                Logger.Log($"[Twitter Handler:{user.ScreenName}] New Tweet, {tweet.Text}");
 
                 channel.SendMessageAsync("", false, new EmbedBuilder() {
                     Color = new Color(43, 149, 255),
                     ThumbnailUrl = tweet.CreatedBy.ProfileImageUrl400x400,
                     ImageUrl = tweet.Entities.Medias.FirstOrDefault()?.MediaURL,
                     Url = tweet.Url,
-                    Description = handlesreplaced,
+                    Description = replaced,
                     Title = $"{tweet.CreatedBy.ScreenName} has a message for his deciples",
                     Footer = new EmbedFooterBuilder() {
                         Text = "Twooter™",
