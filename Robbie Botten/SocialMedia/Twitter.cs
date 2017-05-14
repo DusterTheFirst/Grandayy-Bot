@@ -52,7 +52,7 @@ namespace RobbieBotten.SocialMedia {
                     ImageUrl = tweet.Entities.Medias.FirstOrDefault()?.MediaURL,
                     Url = tweet.Url,
                     Description = replaced,
-                    Title = $"{tweet.CreatedBy.ScreenName} has a message for his deciples",
+                    Title = $"{tweet.CreatedBy.ScreenName} has a message for his desciples",
                     Footer = new EmbedFooterBuilder() {
                         Text = "Twooter™",
                         IconUrl = "https://twitter.com/favicon.ico"
