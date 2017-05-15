@@ -20,7 +20,7 @@ namespace RobbieBotten.Config {
 
         [JsonProperty("channel_ids")]
         public SpecialChannels Channels { get; set; }
-        
+
         [JsonProperty("twitter_accounts")]
         public List<long> TwitterAccouts { get; set; }
         [JsonProperty("youtube_accounts")]
@@ -33,6 +33,9 @@ namespace RobbieBotten.Config {
         public TwitterAPI TwitterAPI { get; set; }
         [JsonProperty("youtube_api")]
         public YoutubeAPI YoutubeAPI { get; set; }
+
+        [JsonProperty("1k")]
+        public bool OneK { get; set; }
 
         public ConfigFile() {
             BotToken = "";
@@ -51,6 +54,8 @@ namespace RobbieBotten.Config {
 
             TwitterAPI = new TwitterAPI();
             YoutubeAPI = new YoutubeAPI();
+
+            OneK = false;
         }
     }
 

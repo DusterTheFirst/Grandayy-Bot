@@ -33,6 +33,7 @@ namespace RobbieBotten.Discord.Commands {
             await DMCommands.AddModuleAsync<HelpModule>();
 
             await PrefixedCommands.AddModuleAsync<HelpModule>();
+            await PrefixedCommands.AddModuleAsync<PrefixedModule>();
 
             await NonprefixedCommands.AddModuleAsync<HelpModule>();
         }
@@ -67,7 +68,7 @@ namespace RobbieBotten.Discord.Commands {
         }
 
         public async Task HandleDM(CommandContext context, int argPos) {
-            Logger.Log($"Commands avaliable: {string.Join(", ", DMCommands.Modules.Select(x => string.Join(", ", x.Commands.Select(c => c.Name))))}");
+            //Logger.Log($"Commands avaliable: {string.Join(", ", DMCommands.Modules.Select(x => string.Join(", ", x.Commands.Select(c => c.Name))))}");
 
             var services = new ServiceCollection()
                 .AddSingleton(config)
@@ -86,7 +87,7 @@ namespace RobbieBotten.Discord.Commands {
         }
 
         public async Task HandlePrefixed(CommandContext context, int argPos) {
-            Logger.Log($"Commands avaliable: {string.Join(", ", PrefixedCommands.Modules.Select(x => string.Join(", ", x.Commands.Select(c => c.Name))))}");
+            //Logger.Log($"Commands avaliable: {string.Join(", ", PrefixedCommands.Modules.Select(x => string.Join(", ", x.Commands.Select(c => c.Name))))}");
 
             var services = new ServiceCollection()
                 .AddSingleton(config)
@@ -94,19 +95,19 @@ namespace RobbieBotten.Discord.Commands {
 
             var provider = new DefaultServiceProviderFactory().CreateServiceProvider(services);
 
-            var result = await DMCommands.ExecuteAsync(context, argPos, provider);
+            var result = await PrefixedCommands.ExecuteAsync(context, argPos, provider);
 
             if (!result.IsSuccess) {
                 await context.Channel.SendMessageAsync(result.ErrorReason);
                 Logger.Warn($"[Prefixed Command Handler] {context.Message.Author} failed to execute '{context.Message.Content}'");
             } else {
-                await context.Message.DeleteAsync();
+                //await context.Message.DeleteAsync();
                 Logger.Log($"[Prefixed Command Handler] {context.Message.Author} executed '{context.Message.Content}'");
             }
         }
 
         public async Task NonprefixedMention(CommandContext context, int argPos) {
-            if (LevenshteinDistance.Compute(context.Message.Content.Split("<")[0], "did you know you can apply for discord partner") < 10) {
+            if (LevenshteinDistance.Compute(context.Message.Content.Split("<")[0], "did you know you can apply for discord partner") < 20) {
                 await context.Channel.SendMessageAsync("No, how so");
             }
         }

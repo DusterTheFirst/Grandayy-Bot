@@ -44,12 +44,12 @@ namespace RobbieBotten.Util {
         }
 
         public static void Error(object message) {
-            Log($"[Error][Bot] {message}", ConsoleColor.Red);
-            Console.Beep();
+            Log($"[Error]{message}", ConsoleColor.Red);
+            //Console.Beep();
         }
         public static void Warn(object message) {
-            Log($"[Warn][Bot] {message}", ConsoleColor.Yellow);
-            Console.Beep();
+            Log($"[Warn]{message}", ConsoleColor.Yellow);
+            //Console.Beep();
         }
     }
 }

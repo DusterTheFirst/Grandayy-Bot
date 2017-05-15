@@ -20,6 +20,7 @@ namespace RobbieBotten.Discord {
         CommandHandler commandhandler;
 
         List<Twitter> twitteraccounts = new List<Twitter>();
+        List<Youtube> youtubeaccounts = new List<Youtube>();
 
         public Bot() {
             configmanager = new ConfigManager();
@@ -63,6 +64,10 @@ namespace RobbieBotten.Discord {
 
             foreach (long p in config.TwitterAccouts) {
                 twitteraccounts.Add(new Twitter(config, SocialMedia, p));
+            }
+
+            foreach (KeyValuePair<string, string> p in config.YoutubeAccounts) {
+                youtubeaccounts.Add(new Youtube(config, SocialMedia, p.Value, p.Key));
             }
         }
     }

@@ -22,6 +22,9 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.0-rc2-00736" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.25.0.760" />
+    <PackageReference Include="ImageSharp" Version="1.0.0-alpha9-00040" />
+    <PackageReference Include="ImageSharp.Drawing" Version="1.0.0-alpha9-00038" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="TweetinviAPI" Version="1.2.0.1" />
   </ItemGroup>
