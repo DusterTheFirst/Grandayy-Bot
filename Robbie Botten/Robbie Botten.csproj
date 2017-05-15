@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <None Remove="config.json" />
-    <None Remove="Console.log" />
     <None Remove="publish.bat" />
     <None Remove="restore 64.bat" />
     <None Remove="restore.bat" />

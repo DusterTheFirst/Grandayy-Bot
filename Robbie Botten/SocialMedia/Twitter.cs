@@ -36,8 +36,6 @@ namespace RobbieBotten.SocialMedia {
             tweets = tweets.Where(t => t.CreatedAt > DateTime.Now.AddMilliseconds(-config.SocialTick)).Reverse();
 
             foreach(ITweet tweet in tweets) {
-                IExtendedTweet extweet = tweet.ExtendedTweet;
-
                 var replaced = Regex.Replace(tweet.Text, "@([A-Za-z]+[A-Za-z0-9]+)", m =>
                     $"[{m.Value}](https://twitter.com/{m.Value.Replace("@", "")})");
 

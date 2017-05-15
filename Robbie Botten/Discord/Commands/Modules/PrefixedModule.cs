@@ -135,17 +135,17 @@ namespace RobbieBotten.Discord.Commands.Modules {
             Stream imagestream = file.GetResponseStream();
 
             WebClient Client = new WebClient();
-            Client.DownloadFile(url, "Carrotzy.png");
+            Client.DownloadFile(url, "temp.png");
 
-            using (Image<Rgba32> image = ImageSharp.Image.Load("Carrotzy.png")) {
+            using (Image<Rgba32> image = ImageSharp.Image.Load("temp.png")) {
                 Logger.Log(file.ContentLength);
                 Logger.Log(file.ContentType);
                 Logger.Log(file.ResponseUri);
                 Logger.Log(new StreamReader(file.GetResponseStream()).ReadToEnd());
-                image.Pixelate(image.Height / 40).Save("Carrotzy1.png");
+                image.Pixelate(image.Height / 40).Save("temp.png");
             }
 
-            await Context.Channel.SendFileAsync("Carrotzy1.png");
+            await Context.Channel.SendFileAsync("temp.png");
 
             output.Dispose();
             imagestream.Dispose();
