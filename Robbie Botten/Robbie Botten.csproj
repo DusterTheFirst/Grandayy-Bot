@@ -17,6 +17,7 @@
     <None Remove="publish.bat" />
     <None Remove="restore 64.bat" />
     <None Remove="restore.bat" />
+    <None Remove="temp.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +27,16 @@
     <PackageReference Include="ImageSharp.Drawing" Version="1.0.0-alpha9-00038" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="TweetinviAPI" Version="1.2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="res\fightresp.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

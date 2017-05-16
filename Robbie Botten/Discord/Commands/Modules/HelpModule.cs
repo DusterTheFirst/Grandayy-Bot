@@ -19,6 +19,7 @@ namespace RobbieBotten.Discord.Commands.Modules {
         /// <returns></returns>
         [Command("help", RunMode = RunMode.Async), Alias("?"), Summary("List all commands availible to you")]
         public async Task HelpAsync() {
+            await Context.Message.DeleteAsync();
             //  Prefix
             string prefix = Context.Message.Content.First() == Config.CommandPrefix ? Config.CommandPrefix.ToString() : "";
 
@@ -57,6 +58,7 @@ namespace RobbieBotten.Discord.Commands.Modules {
         /// <returns></returns>
         [Command("help", RunMode = RunMode.Async), Alias("?"), Summary("Search for help on a command"), Priority(-1)]
         public async Task HelpAsync([Remainder] string command) {
+            await Context.Message.DeleteAsync();
 
             //  Search For Command
             var result = Service.Search(Context, command);

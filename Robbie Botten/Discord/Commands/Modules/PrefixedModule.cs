@@ -2,15 +2,16 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using ImageSharp;
+using ImageSharp.Drawing;
 using RobbieBotten.Config;
 using RobbieBotten.Util;
 using RobbieBotten.Util.Extentions;
-using SixLabors.Fonts;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,10 +19,16 @@ namespace RobbieBotten.Discord.Commands.Modules {
     public class PrefixedModule : ModuleBase {
         public ConfigFile Config { get; set; }
 
-        [Command("memes", RunMode = RunMode.Async), Alias("m"), Summary("Get Grandayys memes playlist")]
+        [Command("memes", RunMode = RunMode.Async), Alias("m"), Summary("Get Grandayy's memes playlist")]
         public async Task Memes() {
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync("https://www.youtube.com/playlist?list=PLd7iEW-IcEboD2dabxaPY2TXKGtkCqyyL");
+        }
+
+        [Command("noteblock_songs", RunMode = RunMode.Async), Alias("nbs"), Summary("Get Grande1899's noteblock songs playlist")]
+        public async Task NoteblockSongs() {
+            await Context.Message.DeleteAsync();
+            await Context.Channel.SendMessageAsync("https://www.youtube.com/playlist?list=PL30419C17041A76D9");
         }
 
         [Command("nsfw", RunMode = RunMode.Async), Summary("Give yourself or others access to the NSFW channel")]
@@ -53,13 +60,44 @@ namespace RobbieBotten.Discord.Commands.Modules {
         }
 
         [Command("fight", RunMode = RunMode.Async), Alias("f"), Summary("Make the given person fight you to the death")]
-        public async Task Fight(IUser opponent) {
+        public async Task Fight(IUser opponent = null) {
+            if (opponent == null) {
+                await Context.Message.DeleteAsync();
+                await Context.Channel.SendMessage("Please input a user's mention as the perameter", MsgLevel.Warn);
+                return;
+            }
             await Fight(Context.User, opponent);
         }
 
         [Command("fight", RunMode = RunMode.Async), Alias("f"), Summary("Make the given people fight to the death")]
-        public async Task Fight(IUser player1, IUser player2) {
-            await Context.Channel.SendMessageAsync("NOT IMPLEMENTED");
+        public async Task Fight(IUser player1 = null, IUser player2 = null) {
+            if (player1 == null || player2 == null) {
+                await Context.Message.DeleteAsync();
+                await Context.Channel.SendMessage("Missing one or more users", MsgLevel.Warn);
+                return;
+            }
+
+            await Context.Message.DeleteAsync();
+            Random rnd = new Random();
+
+            List<string> lines = File.ReadAllLines("res/fightresp.txt").ToList();
+
+            int response = rnd.Next(1, lines.Count);
+            int winner = rnd.Next(0, 1);
+
+            string line = lines[response - 1];
+
+            switch (winner) {
+                case 0:
+                    line = line.Replace("{winner}", player1.Mention).Replace("{loser}", player2.Mention);
+                    break;
+                case 1:
+                    line = line.Replace("{winner}", player2.Mention).Replace("{loser}", player1.Mention);
+                    break;
+            }
+
+            await Context.Channel.SendMessageAsync(line);
+
         }
 
         [Command("1k", RunMode = RunMode.Async), Alias("1000"), Summary("Become an Early Memer")]
@@ -138,11 +176,8 @@ namespace RobbieBotten.Discord.Commands.Modules {
             Client.DownloadFile(url, "temp.png");
 
             using (Image<Rgba32> image = ImageSharp.Image.Load("temp.png")) {
-                Logger.Log(file.ContentLength);
-                Logger.Log(file.ContentType);
-                Logger.Log(file.ResponseUri);
-                Logger.Log(new StreamReader(file.GetResponseStream()).ReadToEnd());
-                image.Pixelate(image.Height / 40).Save("temp.png");
+                image.Pixelate(image.Height / 40)
+                     .Save("temp.png");
             }
 
             await Context.Channel.SendFileAsync("temp.png");
