@@ -13,7 +13,7 @@ namespace RobbieBotten.Discord.Commands.Modules {
     public class RoleModule : ModuleBase {
         public ConfigFile Config { get; set; }
 
-        [Command("1k", RunMode = RunMode.Async), Alias("1000"), Summary("Become an Early Memer")]
+        [Command("1k", RunMode = RunMode.Async), Alias("1000"), Summary(";)")]
         public async Task OneK() {
             await Context.Message.DeleteAsync();
             if (!Config.OneK) {
