@@ -12,14 +12,8 @@ namespace RobbieBotten.Config {
         [JsonProperty("command_prefix")]
         public char CommandPrefix { get; set; }
 
-        [JsonProperty("server_id")]
-        public ulong ServerID { get; set; }
-
-        [JsonProperty("dm_whitelist")]
-        public List<ulong> DMWhitlist { get; set; }
-
-        [JsonProperty("channel_ids")]
-        public SpecialChannels Channels { get; set; }
+        [JsonProperty("announcements_channel")]
+        public ulong AnnouncementsChannel { get; set; }
 
         [JsonProperty("twitter_accounts")]
         public List<long> TwitterAccouts { get; set; }
@@ -39,13 +33,7 @@ namespace RobbieBotten.Config {
 
         public ConfigFile() {
             BotToken = "";
-            CommandPrefix = '>';
-
-            ServerID = 0;
-
-            DMWhitlist = new List<ulong>();
-
-            Channels = new SpecialChannels();
+            CommandPrefix = '\\';
 
             TwitterAccouts = new List<long>();
             YoutubeAccounts = new Dictionary<string, string>();
@@ -57,13 +45,6 @@ namespace RobbieBotten.Config {
 
             OneK = false;
         }
-    }
-
-    public class SpecialChannels {
-        [JsonProperty("announcements")]
-        public ulong AnnouncementsChannel { get; set; }
-        [JsonProperty("commands")]
-        public ulong CommandChannel { get; set; }
     }
 
     public class TwitterAPI {

@@ -33,9 +33,9 @@ namespace RobbieBotten.Discord.Commands {
             await DMCommands.AddModuleAsync<HelpModule>();
 
             await PrefixedCommands.AddModuleAsync<HelpModule>();
-            await PrefixedCommands.AddModuleAsync<PrefixedModule>();
-
-            await NonprefixedCommands.AddModuleAsync<HelpModule>();
+            await PrefixedCommands.AddModuleAsync<FunModule>();
+            await PrefixedCommands.AddModuleAsync<LinkModule>();
+            await PrefixedCommands.AddModuleAsync<RoleModule>();
         }
 
         public async Task Handle(SocketMessage m) {

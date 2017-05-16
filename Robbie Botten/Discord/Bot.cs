@@ -31,11 +31,6 @@ namespace RobbieBotten.Discord {
             };
 
             config = configmanager.Load();
-
-            Logger.Warn("BOT IS IN EARLY DEVELOPMENT");
-            Logger.Warn("3");
-            Logger.Warn("2");
-            Logger.Warn("1");
         }
 
         public async Task Start() {
@@ -58,7 +53,7 @@ namespace RobbieBotten.Discord {
         public async Task Ready() {
             await client.SetGameAsync($"{config.CommandPrefix}help");
 
-            var SocialMedia = client.GetChannel(config.Channels.AnnouncementsChannel) as SocketTextChannel;
+            var SocialMedia = client.GetChannel(config.AnnouncementsChannel) as SocketTextChannel;
 
             Auth.SetUserCredentials(config.TwitterAPI.ConsumerKey, config.TwitterAPI.ConsumerSecret, config.TwitterAPI.UserAccessToken, config.TwitterAPI.UserAccessSeceret);
 

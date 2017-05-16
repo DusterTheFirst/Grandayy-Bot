@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RobbieBotten.Discord.Commands.Modules {
+    [Summary("Help Commands")]
     public class HelpModule : ModuleBase {
         public ConfigFile Config { get; set; }
         public CommandService Service { get; set; }
@@ -25,8 +26,8 @@ namespace RobbieBotten.Discord.Commands.Modules {
 
             //  Embed
             var builder = new EmbedBuilder() {
-                Title = $"Commands available to {Context.Message.Author.Username}",
-                Description = "\n",
+                //Title = $"Commands available to {Context.Message.Author.Username}",
+                Description = $"\n\n",
                 Color = new Color((int) MsgLevel.Good),
                 Timestamp = DateTimeOffset.UtcNow
             };
@@ -43,7 +44,11 @@ namespace RobbieBotten.Discord.Commands.Modules {
 
                 //  Adds Field To Embed
                 if (!string.IsNullOrWhiteSpace(description)) {
-                    builder.Description += description;
+                    builder.AddField(new EmbedFieldBuilder() {
+                        IsInline = false,
+                        Name = module.Summary != null ? module.Summary : "Other Commands",
+                        Value = description
+                    });
                 }
             }
 
