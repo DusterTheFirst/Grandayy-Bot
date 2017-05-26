@@ -13,11 +13,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="3657556095.tweet" />
+    <None Remove="365956744.tweet" />
     <None Remove="config.json" />
+    <None Remove="publish any.bat" />
     <None Remove="publish.bat" />
     <None Remove="restore 64.bat" />
     <None Remove="restore.bat" />
     <None Remove="temp.png" />
+    <None Remove="UC0S_JhX3wLCnKgoUpYU0t0g.video" />
+    <None Remove="UC9sY9S-ddN-1E0jD2fFWLig.video" />
+    <None Remove="UCa6TeYZ2DlueFRne5DyAnyg.video" />
   </ItemGroup>
 
   <ItemGroup>

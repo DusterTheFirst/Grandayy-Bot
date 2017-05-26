@@ -79,7 +79,8 @@ namespace RobbieBotten.Discord.Commands {
             var result = await DMCommands.ExecuteAsync(context, argPos, provider);
 
             if (!result.IsSuccess) {
-                await context.Channel.SendMessageAsync(result.ErrorReason);
+                if (result.ErrorReason.ToLower() != "Unknown Command")
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
                 Logger.Warn($"[DM Command Handler] {context.Message.Author} messaged you '{context.Message.Content}'");
             } else {
                 Logger.Log($"[DM Command Handler] {context.Message.Author} executed '{context.Message.Content}'");
@@ -98,7 +99,8 @@ namespace RobbieBotten.Discord.Commands {
             var result = await PrefixedCommands.ExecuteAsync(context, argPos, provider);
 
             if (!result.IsSuccess) {
-                await context.Channel.SendMessageAsync(result.ErrorReason);
+                if(result.ErrorReason.ToLower() != "Unknown Command")
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
                 Logger.Warn($"[Prefixed Command Handler] {context.Message.Author} failed to execute '{context.Message.Content}'");
             } else {
                 //await context.Message.DeleteAsync();
@@ -107,7 +109,7 @@ namespace RobbieBotten.Discord.Commands {
         }
 
         public async Task NonprefixedMention(CommandContext context, int argPos) {
-            if (LevenshteinDistance.Compute(context.Message.Content.Split("<")[0], "did you know you can apply for discord partner") < 20) {
+            if (LevenshteinDistance.Compute(context.Message.Content.ToLower(), "did you know you can apply for discord partner") < 20) {
                 await context.Channel.SendMessageAsync("No, how so");
             }
         }

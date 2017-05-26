@@ -1,3 +1,3 @@
 @echo off
-dotnet restore
+dotnet restore -r win10-x64
 pause
