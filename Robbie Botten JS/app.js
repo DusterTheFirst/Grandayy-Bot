@@ -4,10 +4,12 @@ const SimplerDiscord = require("simpler-discord");
 const Config = require("./config.json");
 const FightResp = require("./res/fightresp.json");
 var Jimp = require("jimp");
+var TwitterPackage = require('twitter');
 
 var Commands = new SimplerDiscord.CommandHandler("\\", {}, 5000);
 var Fight = new SimplerDiscord.RandomMessage(FightResp);
 var Two = new SimplerDiscord.RandomMessage([true, false]);
+var Twitter = new TwitterPackage(Config.twitter);
 delete Commands.commands["Utility Commands"];
 
 var Client = new Discord.Client();
@@ -37,7 +39,7 @@ function CarrotCommand(message, args, handler) {
     imageurl = imageurl.url;
 
     Jimp.read(imageurl).then(function (image) {
-        image.pixelate(5)
+        image.pixelate(image.bitmap.height/20)
             .getBuffer(Jimp.MIME_PNG, (error, buffer) => {
             message.channel.send("", {
                 files: [{
@@ -72,21 +74,25 @@ function GrandayyCommand(message, args, handler) {
 
     imageurl = imageurl.url;
 
-    message.channel.send("**no. ;)**");
+    var watermark;
 
-    //Jimp.read(imageurl).then(function (image) {
-    //    image.composite(5)
-    //        .getBuffer(Jimp.MIME_PNG, (error, buffer) => {
-    //            message.channel.send("", {
-    //                files: [{
-    //                    attachment: buffer,
-    //                    name: "grandayy.png"
-    //                }]
-    //            });
-    //        });
-    //});
+    Jimp.read("./res/watermark.png").then(function (image) {
+        watermark = image.opacity(.75);
+    });
+
+    Jimp.read(imageurl).then(function (image) {
+        watermark.resize(watermark.bitmap.width / watermark.bitmap.height * (image.bitmap.height / 5), image.bitmap.height / 5);
+        image.composite(watermark, 20, image.bitmap.height - (watermark.bitmap.height + 20))
+            .getBuffer(Jimp.MIME_PNG, (error, buffer) => {
+                message.channel.send("", {
+                    files: [{
+                        attachment: buffer,
+                        name: "grandayy.png"
+                    }]
+                });
+            });
+    });
 }
-
 
 function NSFWCommand(message, args, handler) {
     var role = message.guild.roles.find(x => x.name === 'nsfw-access');
@@ -101,6 +107,16 @@ function NSFWCommand(message, args, handler) {
 
     return true;
 }
+
+Twitter.stream('statuses/filter', { track: 'dusterthesecond' }, function (stream) {
+    stream.on('data', function (tweet) {
+        console.log(tweet.text);
+    });
+
+    stream.on('error', function (error) {
+        console.log(error);
+    });
+});
 
 Client.on("error", (msg) => { console.log(msg.red); });
 Client.on("warn", (msg) => { console.log(msg.yellow); });

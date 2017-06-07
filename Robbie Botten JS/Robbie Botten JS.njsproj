@@ -34,6 +34,7 @@
     </Content>
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="res\watermark.png" />
     <Content Include="res\fightresp.json">
       <SubType>Code</SubType>
     </Content>
