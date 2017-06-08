@@ -21,7 +21,9 @@ Commands.register(new SimplerDiscord.Command("grandayy", ["image url"], "Granday
 Commands.register(new SimplerDiscord.Command("fight", ["opponent"], "Gain acess to the nsfw realm", FightCommand), "Fun Commands");
 Commands.register(new SimplerDiscord.Command("fight", ["player1", "player2"], "Gain acess to the nsfw realm", FightCommand), "Fun Commands");
 
-Commands.register(new SimplerDiscord.Command("nsfw", null, "Gain acess to the nsfw realm", NSFWCommand), "Util Commands");
+Commands.register(new SimplerDiscord.Command("nsfw", null, "Gain/revoke acess to the nsfw realm", NSFWCommand), "Util Commands");
+
+Commands.register(new SimplerDiscord.Command("info", null, "Get sum of dat info", InfoCommand), "Info Commands");
 
 Commands.register(new SimplerDiscord.Command("memes", null, "Grandayy's meme playlist", (message) => { message.channel.send("https://www.youtube.com/playlist?list=PLd7iEW-IcEboD2dabxaPY2TXKGtkCqyyL"); return true; }), "Helpful Links");
 Commands.register(new SimplerDiscord.Command("noteblocksongs", null, "Grande1899's noteblock songs playlist", (message) => { message.channel.send("https://www.youtube.com/playlist?list=PL30419C17041A76D9"); return true; }), "Helpful Links");
@@ -108,6 +110,24 @@ function NSFWCommand(message, args, handler) {
     return true;
 }
 
+function InfoCommand(message, args, handler) {
+    var builder = new Discord.RichEmbed();
+
+    var time = process.uptime();
+    var uptime = (time + "").toHHMMSS();
+
+    builder.setTitle("Robbie Botten - Info");
+    builder.setColor(message.guild.me.displayColor);
+    builder.setDescription(`Robbie Botten is a discord bot designed for Grandayy's discord server. Type ***${Commands.prefix}help***`);
+    builder.setThumbnail(Client.user.displayAvatarURL);
+    builder.addField("Bot Info", "Written In: *[node.js](https://nodejs.org/en/)*\nVersion: *Fuck knows*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[SimplerDiscord](https://github.com/DusterTheFirst/SimplerDiscord)*\nSource Code: *[All Versions](https://github.com/DusterTheFirst/RobbieBotten)* or *[Node Version](https://github.com/DusterTheFirst/RobbieBotten/tree/master/Robbie%20Botten%20JS)*", true);
+    builder.addField("Stats", `Uptime: *${uptime}*\nPing: *${Client.ping}ms*\nLines: *Wayy too many*\nTime Wasted: *A lot*`, true);
+    builder.addField("Credits", "Avatar: *Carrotzy*\nBot: *DusterTheFirst*", false);
+    
+    message.channel.send("", { embed: builder });
+}
+
+
 Twitter.stream('statuses/filter', { track: 'dusterthesecond' }, function (stream) {
     stream.on('data', function (tweet) {
         console.log(tweet.text);
@@ -148,5 +168,17 @@ Client.login(Config.token);
 String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
+};
+String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - hours * 3600) / 60);
+    var seconds = sec_num - hours * 3600 - minutes * 60;
+
+    if (hours < 10) { hours = "0" + hours; }
+    if (minutes < 10) { minutes = "0" + minutes; }
+    if (seconds < 10) { seconds = "0" + seconds; }
+    var time = hours + ':' + minutes + ':' + seconds;
+    return time;
 };
 //
