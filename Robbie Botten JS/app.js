@@ -120,7 +120,7 @@ function InfoCommand(message, args, handler) {
     builder.setColor(message.guild.me.displayColor);
     builder.setDescription(`Robbie Botten is a discord bot designed for Grandayy's discord server. Type ***${Commands.prefix}help***`);
     builder.setThumbnail(Client.user.displayAvatarURL);
-    builder.addField("Bot Info", "Written In: *[node.js](https://nodejs.org/en/)*\nVersion: *Fuck knows*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[SimplerDiscord](https://github.com/DusterTheFirst/SimplerDiscord)*\nSource Code: *[All Versions](https://github.com/DusterTheFirst/RobbieBotten)* or *[Node Version](https://github.com/DusterTheFirst/RobbieBotten/tree/master/Robbie%20Botten%20JS)*", true);
+    builder.addField("Bot Info", "Written In: *[javascript](https://www.javascript.com/), running the [node.js](https://nodejs.org/en/) framework*\nVersion: *Fuck knows*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[SimplerDiscord](https://github.com/DusterTheFirst/SimplerDiscord)*\nSource Code: *[All Versions](https://github.com/DusterTheFirst/RobbieBotten)* or *[Node Version](https://github.com/DusterTheFirst/RobbieBotten/tree/master/Robbie%20Botten%20JS)*", true);
     builder.addField("Stats", `Uptime: *${uptime}*\nPing: *${Client.ping}ms*\nLines: *Wayy too many*\nTime Wasted: *A lot*`, true);
     builder.addField("Credits", "Avatar: *Carrotzy*\nBot: *DusterTheFirst*", false);
     
