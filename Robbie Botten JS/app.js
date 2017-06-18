@@ -5,6 +5,7 @@ const Config = require("./config.json");
 const FightResp = require("./res/fightresp.json");
 var Jimp = require("jimp");
 var TwitterPackage = require('twitter');
+var Server = require('./Server');
 
 var Commands = new SimplerDiscord.CommandHandler("\\", {}, 5000);
 var Fight = new SimplerDiscord.RandomMessage(FightResp);
@@ -13,6 +14,8 @@ var Twitter = new TwitterPackage(Config.twitter);
 delete Commands.commands["Utility Commands"];
 
 var Client = new Discord.Client();
+
+Server.setClient(Client);
 
 Commands.register(new SimplerDiscord.Command("carrotzy", ["image url"], "Carrotzify the image from the url", CarrotCommand), "Fun Commands");
 Commands.register(new SimplerDiscord.Command("carrotzy", null, "Carrotzify the attached image", CarrotCommand), "Fun Commands");
@@ -127,13 +130,33 @@ function InfoCommand(message, args, handler) {
     message.channel.send("", { embed: builder });
 }
 
-
-Twitter.stream('statuses/filter', { track: 'dusterthesecond' }, function (stream) {
-    stream.on('data', function (tweet) {
-        console.log(tweet.text);
+let channel;
+let twitter = [
+    //3657556095, //Me
+    365956744 //Grandayy
+];
+Twitter.stream('statuses/filter', { follow: twitter.toString() }, (stream) => {
+    stream.on('data', (tweet) => {
+        if (twitter.includes(tweet.user.id)) { // Only tweets from the user id
+            let image_url = "";
+            if (tweet.entities.media !== undefined)
+                image_url = tweet.entities.media[0].media_url;
+            channel.send("", {
+                embed: new Discord.RichEmbed()
+                    .setTitle(`${tweet.user.name} has a message for his desciples`)
+                    .setURL(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
+                    .setDescription(replaceMentionsWithLinks(replaceHashtagsWithLinks(tweet.text)))
+                    .setImage(image_url)
+                    .setThumbnail(tweet.user.profile_image_url)
+                    .setColor(tweet.user.profile_background_color)
+                    .setFooter("Twooter\u2122")
+                    .setTimestamp()
+            });
+            console.log(`New tweet from ${tweet.user.name}, ${tweet.text}`);
+        }
     });
 
-    stream.on('error', function (error) {
+    stream.on('error', (error) => {
         console.log(error);
     });
 });
@@ -148,7 +171,8 @@ Client.on("debug", (msg) => {
 
 Client.on("ready", () => {
     console.log(`Logged in with user ${Client.user.username}`.green);
-    Client.user.setGame("n00t.js");
+    Client.user.setGame("cult of purple", "https://www.twitch.tv/discordapp");
+    channel = Client.guilds.first().channels.find('name', "grandayystuff");
 });
 
 Client.on("message", (message) => {
@@ -156,13 +180,6 @@ Client.on("message", (message) => {
 });
 
 Client.login(Config.token);
-
-/*
-\fight [opponent] - Make the given person fight you to the death
-\fight [player1] [player2] - Make the given people fight to the death
-\carrotzy  - Carrotzyify the attached image
-\carrotzy [url] - Carrotzyify the image from the url
-*/
 
 //
 String.prototype.replaceAll = function (search, replacement) {
@@ -181,4 +198,13 @@ String.prototype.toHHMMSS = function () {
     var time = hours + ':' + minutes + ':' + seconds;
     return time;
 };
+
+function replaceMentionsWithLinks(text) {
+    return text.replace(/@([a-z\d_]+)/ig, '[@$1](http://twitter.com/$1)');
+}
+function replaceHashtagsWithLinks(text) {
+    return text.replace(/#([a-z\d_]+)/ig, '[#$1](https://twitter.com/hashtag/$1)');
+}
 //
+
+//let server = Server.listen("80");
