@@ -5,7 +5,6 @@ const Config = require("./config.json");
 const FightResp = require("./res/fightresp.json");
 var Jimp = require("jimp");
 var TwitterPackage = require('twitter');
-var Server = require('./Server');
 
 var Commands = new SimplerDiscord.CommandHandler("\\", {}, 5000);
 var Fight = new SimplerDiscord.RandomMessage(FightResp);
@@ -21,10 +20,8 @@ Commands.register(new SimplerDiscord.Command("carrotzy", ["image url"], "Carrotz
 Commands.register(new SimplerDiscord.Command("carrotzy", null, "Carrotzify the attached image", CarrotCommand), "Fun Commands");
 Commands.register(new SimplerDiscord.Command("grandayy", null, "Grandayyify the attached image", GrandayyCommand), "Fun Commands");
 Commands.register(new SimplerDiscord.Command("grandayy", ["image url"], "Grandayyify the image from the url", GrandayyCommand), "Fun Commands");
-Commands.register(new SimplerDiscord.Command("fight", ["opponent"], "Gain acess to the nsfw realm", FightCommand), "Fun Commands");
-Commands.register(new SimplerDiscord.Command("fight", ["player1", "player2"], "Gain acess to the nsfw realm", FightCommand), "Fun Commands");
-
-Commands.register(new SimplerDiscord.Command("nsfw", null, "Gain/revoke acess to the nsfw realm", NSFWCommand), "Util Commands");
+Commands.register(new SimplerDiscord.Command("fight", ["opponent"], "Fight the given opponent to the death", FightCommand), "Fun Commands");
+Commands.register(new SimplerDiscord.Command("fight", ["player1", "player2"], "Make the given perople fight to the death", FightCommand), "Fun Commands");
 
 Commands.register(new SimplerDiscord.Command("info", null, "Get sum of dat info", InfoCommand), "Info Commands");
 
@@ -99,20 +96,6 @@ function GrandayyCommand(message, args, handler) {
     });
 }
 
-function NSFWCommand(message, args, handler) {
-    var role = message.guild.roles.find(x => x.name === 'nsfw-access');
-
-    if (message.member.roles.some(x => x.name === 'nsfw-access')) {
-        message.member.removeRole(role);
-        message.channel.send("You have been saved from the depths of hell");
-    } else {
-        message.member.addRole(role);
-        message.channel.send("Why?");
-    }
-
-    return true;
-}
-
 function InfoCommand(message, args, handler) {
     var builder = new Discord.RichEmbed();
 
@@ -161,6 +144,13 @@ Twitter.stream('statuses/filter', { follow: twitter.toString() }, (stream) => {
     });
 });
 
+let youtube = [
+    "UC0S_JhX3wLCnKgoUpYU0t0g", //Me
+    "UCa6TeYZ2DlueFRne5DyAnyg", //Grandayy
+    "UC9sY9S-ddN-1E0jD2fFWLig" //Grande1899
+];
+//YOUBETUBE
+
 Client.on("error", (msg) => { console.log(msg.red); });
 Client.on("warn", (msg) => { console.log(msg.yellow); });
 Client.on("debug", (msg) => {
@@ -205,6 +195,3 @@ function replaceMentionsWithLinks(text) {
 function replaceHashtagsWithLinks(text) {
     return text.replace(/#([a-z\d_]+)/ig, '[#$1](https://twitter.com/hashtag/$1)');
 }
-//
-
-//let server = Server.listen("80");
