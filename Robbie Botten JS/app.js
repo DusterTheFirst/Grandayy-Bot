@@ -29,6 +29,7 @@ Commands.register(new SimplerDiscord.Command("memes", null, "Grandayy's meme pla
 Commands.register(new SimplerDiscord.Command("noteblocksongs", null, "Grande1899's noteblock songs playlist", (message) => { message.channel.send("https://www.youtube.com/playlist?list=PL30419C17041A76D9"); return true; }), "Helpful Links");
 Commands.register(new SimplerDiscord.Command("othermemes", null, "Grande1899's meme playlist", (message) => { message.channel.send("https://www.youtube.com/playlist?list=PLAgzw7vzgd5D5qH9Hqmn83yVnYLUaF-gE"); return true; }), "Helpful Links");
 
+//Commands.register(new SimplerDiscord.Command("ban", ["user"], "Ban a user", BanComamnd), "Mod commands");
 
 function CarrotCommand(message, args, handler) {
     let imageurl = args[0] === undefined ? message.attachments.first() : { url: args[0] };
@@ -111,6 +112,10 @@ function InfoCommand(message, args, handler) {
     builder.addField("Credits", "Avatar: *Carrotzy*\nBot: *DusterTheFirst*", false);
     
     message.channel.send("", { embed: builder });
+}
+
+function BanCommand(message, args, handler) {
+
 }
 
 let channel;
