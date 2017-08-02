@@ -14,8 +14,6 @@ delete Commands.commands["Utility Commands"];
 
 var Client = new Discord.Client();
 
-Server.setClient(Client);
-
 Commands.register(new SimplerDiscord.Command("carrotzy", ["image url"], "Carrotzify the image from the url", CarrotCommand), "Fun Commands");
 Commands.register(new SimplerDiscord.Command("carrotzy", null, "Carrotzify the attached image", CarrotCommand), "Fun Commands");
 Commands.register(new SimplerDiscord.Command("grandayy", null, "Grandayyify the attached image", GrandayyCommand), "Fun Commands");
@@ -29,7 +27,7 @@ Commands.register(new SimplerDiscord.Command("memes", null, "Grandayy's meme pla
 Commands.register(new SimplerDiscord.Command("noteblocksongs", null, "Grande1899's noteblock songs playlist", (message) => { message.channel.send("https://www.youtube.com/playlist?list=PL30419C17041A76D9"); return true; }), "Helpful Links");
 Commands.register(new SimplerDiscord.Command("othermemes", null, "Grande1899's meme playlist", (message) => { message.channel.send("https://www.youtube.com/playlist?list=PLAgzw7vzgd5D5qH9Hqmn83yVnYLUaF-gE"); return true; }), "Helpful Links");
 
-//Commands.register(new SimplerDiscord.Command("ban", ["user"], "Ban a user", BanComamnd), "Mod commands");
+Commands.register(new SimplerDiscord.Command("enlist", null, "Enlist yourself", EnlistCommand), "Util commands");
 
 function CarrotCommand(message, args, handler) {
     let imageurl = args[0] === undefined ? message.attachments.first() : { url: args[0] };
@@ -114,9 +112,17 @@ function InfoCommand(message, args, handler) {
     message.channel.send("", { embed: builder });
 }
 
-function BanCommand(message, args, handler) {
-
+function EnlistCommand(message, args, handler) {
+    var role = message.guild.roles.find(x => x.name === 'enlisted');
+    if (message.member.roles.some(x => x.name === 'enlisted')) {
+        message.reply("You already have the role!");
+    } else {
+        message.member.addRole(role);
+        message.reply("you've been enlisted!");
+    }
+    return true;
 }
+
 
 let channel;
 let twitter = [
