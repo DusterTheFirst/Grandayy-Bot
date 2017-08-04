@@ -113,12 +113,16 @@ function InfoCommand(message, args, handler) {
 }
 
 function EnlistCommand(message, args, handler) {
-    var role = message.guild.roles.find(x => x.name === 'enlisted');
-    if (message.member.roles.some(x => x.name === 'enlisted')) {
-        message.reply("You already have the role!");
-    } else {
-        message.member.addRole(role);
-        message.reply("you've been enlisted!");
+    try {
+        var role = message.guild.roles.find(x => x.name === 'enlisted');
+        if (message.member.roles.some(x => x.name === 'enlisted')) {
+            message.reply("You already have the role!");
+        } else {
+            message.member.addRole(role);
+            message.reply("you've been enlisted!");
+        }
+    } catch (e) {
+        message.channel.send("***INTERNAL ERROR, PLEASE TRY AGAIN***");
     }
     return true;
 }
@@ -131,7 +135,7 @@ let twitter = [
 ];
 Twitter.stream('statuses/filter', { follow: twitter.toString() }, (stream) => {
     stream.on('data', (tweet) => {
-        if (twitter.includes(tweet.user.id)) { // Only tweets from the user id
+        if (twitter.includes(tweet.user.id) && !tweet.in_reply_to_screen_name) { // Only tweets from the user id
             let image_url = "";
             if (tweet.entities.media !== undefined)
                 image_url = tweet.entities.media[0].media_url;
