@@ -105,7 +105,7 @@ Commands.createCommand('info')
         .setDescription('Get some of dat info')
         .setCategory('Info Commands')
         .setCallback((context) => {
-            var builder = new Discord.RichEmbed();
+            var builder = new Mechan.Discord.RichEmbed();
             
             var time = process.uptime();
             var uptime = (time + "").toHHMMSS();
@@ -114,7 +114,7 @@ Commands.createCommand('info')
             builder.setColor(message.guild.me.displayColor);
             builder.setDescription(`Robbie Botten is a discord bot designed for Grandayy's discord server. Type ***${Commands.prefix}help***`);
             builder.setThumbnail(Client.user.displayAvatarURL);
-            builder.addField("Bot Info", "Written In: *[javascript](https://www.javascript.com/), running the [node.js](https://nodejs.org/en/) framework*\nVersion: *Fuck knows*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[SimplerDiscord](https://github.com/DusterTheFirst/SimplerDiscord)*\nSource Code: *[All Versions](https://github.com/DusterTheFirst/RobbieBotten)* or *[Node Version](https://github.com/DusterTheFirst/RobbieBotten/tree/master/Robbie%20Botten%20JS)*", true);
+            builder.addField("Bot Info", "Written In: *[javascript](https://www.javascript.com/), running the [node.js](https://nodejs.org/en/) framework*\nVersion: *Fuck knows*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[Mechan.js](https://github.com/DusterTheFirst/mechan.js)*\nSource Code: *[All Versions](https://github.com/DusterTheFirst/RobbieBotten)* or *[Node Version](https://github.com/DusterTheFirst/RobbieBotten/tree/master/Robbie%20Botten%20JS)*", true);
             builder.addField("Stats", `Uptime: *${uptime}*\nPing: *${Client.ping}ms*\nLines: *Wayy too many*\nTime Wasted: *A lot*`, true);
             builder.addField("Credits", "Avatar: *Carrotzy*\nBot: *DusterTheFirst*", false);
             
@@ -168,7 +168,7 @@ Twitter.stream('statuses/filter', { follow: twitter.toString() }, (stream) => {
             if (tweet.entities.media !== undefined)
                 image_url = tweet.entities.media[0].media_url;
             channel.send("", {
-                embed: new Discord.RichEmbed()
+                embed: new Mechan.Discord.RichEmbed()
                     .setTitle(`${tweet.user.name} has a message for his desciples`)
                     .setURL(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
                     .setDescription(replaceMentionsWithLinks(replaceHashtagsWithLinks(tweet.text)))
