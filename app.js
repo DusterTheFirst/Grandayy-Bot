@@ -25,7 +25,7 @@ Commands.createCommand('carrotzy')
         .setCategory('Fun Commands')
         .setCallback((context) => {
             context.channel.startTyping();
-            let imageurl = context.message.attachments.first() ? context.message.attachments.first() : { url: args[0] };
+            let imageurl = context.message.attachments.first() ? context.message.attachments.first() : { url: context.args[0] };
             
             if (imageurl === undefined || imageurl === {}) {
                 message.channel.send("**Please attach an image, or give a url to an image**");
@@ -55,7 +55,7 @@ Commands.createCommand('grandayy')
         .setCategory('Fun Commands')
         .setCallback((context) => {
             context.channel.startTyping();
-            let imageurl = context.message.attachments.first() ? context.message.attachments.first() : { url: args[0] };
+            let imageurl = context.message.attachments.first() ? context.message.attachments.first() : { url: context.args[0] };
             
             if (imageurl === undefined || imageurl === {}) {
                 message.channel.send("**Please attach an image, or give a url to an image**");
