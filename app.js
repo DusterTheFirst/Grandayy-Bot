@@ -235,8 +235,10 @@ let server = https.createServer({
                 return;
             }
 
-            res.writeHead(200);
-            res.end(JSON.stringify(member));
+            res.writeHead(303, {
+                Location: "https://grandayy.github.io"
+            });
+            res.end();
 
             
             responses.send("", new Mechan.Discord.RichEmbed()
