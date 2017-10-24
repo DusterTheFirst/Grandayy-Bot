@@ -248,8 +248,8 @@ let server = https.createServer({
                 .setTimestamp()
                 .setThumbnail(member.user.avatarURL)
                 .addField('Author', `${member.user.tag}`)
-                .addField('User-Agent', req.rawHeaders["User-Agent"])
-                .addField('IP', req.connection.remoteAddress));
+                .addField('User-Agent', req.headers["user-agent"])
+                .addField('IP', req.connection.remoteAddress.replace('::ffff:', "")));
 
             member.send("The admins of " + Client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
                 new Mechan.Discord.RichEmbed()
