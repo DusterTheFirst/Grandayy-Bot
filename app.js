@@ -1,5 +1,8 @@
 const Colors = require("colors");
 const Mechan = require("mechan.js");
+const https = require("https");
+const qs = require('querystring');
+const fs = require('fs');
 const Config = require("./config.json");
 const FightResp = require("./res/fightresp.json");
 const Jimp = require("jimp");
@@ -64,7 +67,7 @@ Commands.createCommand('grandayy')
         
             imageurl = imageurl.url;
         
-            Jimp.read("./res/watermark.png").then((image) => {
+            Jimp.read(__dirname + "/res/watermark.png").then((image) => {
                 let watermark = image.opacity(.75);
                 Jimp.read(imageurl).then((image) => {
                     watermark.resize(watermark.bitmap.width / watermark.bitmap.height * (image.bitmap.height / 5), image.bitmap.height / 5);
@@ -199,10 +202,79 @@ Client.on("ready", () => {
     console.log(`Logged in with user ${Client.user.username}`.green);
     Client.user.setGame("cult of purple", "https://www.twitch.tv/discordapp");
     channel = Client.guilds.first().channels.find('name', "grandayystuff");
+
+    
+    server.listen(32123);
 });
+
+const responses = new Mechan.Discord.WebhookClient('372486252546752518', '1HcfV24CP3IYCZEASOBNmYKiRsAVn-lF7vGT37bTGdum47C6AZpZr6eG9qaeptT-OVxT');
+
+let server = https.createServer({
+    cert: fs.readFileSync(__dirname + '/certificate.crt'),
+    key: fs.readFileSync(__dirname + "/key.crt")
+}, (req, res) => {
+    if (req.method === 'POST') {
+        var body = '';
+        req.on('data', function(chunk) {
+          body += chunk;
+        });
+        req.on('end', function() {
+            var data = qs.parse(body);
+
+            if (!data.tag || !data.title || !data.content) {
+                res.end('MISSING PARAMETERS YA DOOFUS')
+                return;
+            }
+
+            Client.guilds.find('id', '306061550693777409').fetchMembers();
+
+            let member = Client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === data.tag.toLowerCase());
+
+            if (!member) {
+                res.end('<h1>Invalid member tag<br>You cannot submit a request with an invalid tag<br>Check your spelling and try again<h1>')
+                return;
+            }
+
+            res.writeHead(200);
+            res.end(JSON.stringify(member));
+
+            
+            responses.send("", new Mechan.Discord.RichEmbed()
+                .setTitle("TITLE: " + data.title)
+                .setDescription(data.content)
+                .setColor(13380104)
+                .setTimestamp()
+                .setThumbnail(member.user.avatarURL)
+                .addField('Author', `${member.user.tag}`)
+                .addField('User-Agent', req.rawHeaders["User-Agent"])
+                .addField('IP', req.connection.remoteAddress));
+
+            member.send("The admins of " + Client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
+                new Mechan.Discord.RichEmbed()
+                .setTitle("TITLE: " + data.title)
+                .setDescription(data.content)
+                .setColor(13380104)
+                .setTimestamp()
+                .setThumbnail(member.user.avatarURL)
+                .addField('Author', `${member.user.tag}`))
+
+            // now you can access `data.email` and `data.password`
+            // res.writeHead(200);
+            // res.end(JSON.stringify(data));
+        });
+    } else {
+        res.writeHead(403);
+        res.end();
+    }
+});
+
 
 Commands.install(Client)
         .login(Config.token);
+
+
+
+
 
 function replaceMentionsWithLinks(text) {
     return text.replace(/@([a-z\d_]+)/ig, '[@$1](http://twitter.com/$1)');
