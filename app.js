@@ -1,5 +1,6 @@
 const Colors = require("colors");
 const Mechan = require("mechan.js");
+const express = require("express");
 const https = require("https");
 const qs = require('querystring');
 const fs = require('fs');
@@ -209,66 +210,99 @@ Client.on("ready", () => {
 
 const responses = new Mechan.Discord.WebhookClient('372486252546752518', '1HcfV24CP3IYCZEASOBNmYKiRsAVn-lF7vGT37bTGdum47C6AZpZr6eG9qaeptT-OVxT');
 
+var privateKey = fs.readFileSync('key.crt');
+var certificate = fs.readFileSync('certificate.crt');
+
+let app = express();
+
+app.get('/', (req, res) => {
+    res.sendStatus(404);
+});
+
+app.post('/feedback', (req, res) => {
+    res.send('FEEDBACK FORM');
+});
+app.get("/feedback", (req, res) => {
+    res.sendStatus(405);
+});
+
+app.get('/api', (req, res) => {
+    res.send('API ENDPOINT');    
+});
+
+app.get('/api/guild/', (req, res) => {
+    res.send('GUILD INFO');
+});
+
+app.get('/api/users/:userid', (req, res) => {
+    res.send('USER INFO FOR USER ' + req.params.userid);
+});
+
 let server = https.createServer({
-    cert: fs.readFileSync(__dirname + '/certificate.crt'),
-    key: fs.readFileSync(__dirname + "/key.crt")
-}, (req, res) => {
-    if (req.method === 'POST') {
-        var body = '';
-        req.on('data', function(chunk) {
-          body += chunk;
-        });
-        req.on('end', function() {
-            var data = qs.parse(body);
+    key: privateKey,
+    cert: certificate
+}, app);
 
-            if (!data.tag || !data.title || !data.content) {
-                res.end('MISSING PARAMETERS YA DOOFUS')
-                return;
-            }
+// let server = https.createServer({
+//     cert: fs.readFileSync(__dirname + '/certificate.crt'),
+//     key: fs.readFileSync(__dirname + "/key.crt")
+// }, (req, res) => {
+//     if (req.method === 'POST') {
+//         var body = '';
+//         req.on('data', function(chunk) {
+//           body += chunk;
+//         });
+//         req.on('end', function() {
+//             var data = qs.parse(body);
 
-            Client.guilds.find('id', '306061550693777409').fetchMembers();
+//             if (!data.tag || !data.title || !data.content) {
+//                 res.end('MISSING PARAMETERS YA DOOFUS')
+//                 return;
+//             }
 
-            let member = Client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === data.tag.toLowerCase());
+//             Client.guilds.find('id', '306061550693777409').fetchMembers();
 
-            if (!member) {
-                res.end('<h1>Invalid member tag<br>You cannot submit a request with an invalid tag<br>Check your spelling and try again<h1>')
-                return;
-            }
+//             let member = Client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === data.tag.toLowerCase());
 
-            res.writeHead(303, {
-                Location: "https://grandayy.github.io"
-            });
-            res.end();
+//             if (!member) {
+//                 res.end('<h1>Invalid member tag<br>You cannot submit a request with an invalid tag<br>Check your spelling and try again<h1>')
+//                 return;
+//             }
+
+//             res.writeHead(303, {
+//                 Location: "https://grandayy.github.io"
+//             });
+//             res.end();
 
             
-            responses.send("", new Mechan.Discord.RichEmbed()
-                .setTitle("TITLE: " + data.title)
-                .setDescription(data.content)
-                .setColor(13380104)
-                .setTimestamp()
-                .setThumbnail(member.user.avatarURL)
-                .addField('Author', `${member.user.tag}`)
-                .addField('User-Agent', req.headers["user-agent"])
-                .addField('IP', req.connection.remoteAddress.replace('::ffff:', "")));
+//             responses.send("", new Mechan.Discord.RichEmbed()
+//                 .setTitle("TITLE: " + data.title)
+//                 .setDescription(data.content)
+//                 .setColor(13380104)
+//                 .setTimestamp()
+//                 .setThumbnail(member.user.avatarURL)
+//                 .addField('Author', `${member.user.tag}`)
+//                 .addField('User-Agent', req.headers["user-agent"])
+//                 .addField('IP', req.connection.remoteAddress.replace('::ffff:', "")));
 
-            member.send("The admins of " + Client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
-                new Mechan.Discord.RichEmbed()
-                .setTitle("TITLE: " + data.title)
-                .setDescription(data.content)
-                .setColor(13380104)
-                .setTimestamp()
-                .setThumbnail(member.user.avatarURL)
-                .addField('Author', `${member.user.tag}`))
+//             member.send("The admins of " + Client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
+//                 new Mechan.Discord.RichEmbed()
+//                 .setTitle("TITLE: " + data.title)
+//                 .setDescription(data.content)
+//                 .setColor(13380104)
+//                 .setTimestamp()
+//                 .setThumbnail(member.user.avatarURL)
+//                 .addField('Author', `${member.user.tag}`))
 
-            // now you can access `data.email` and `data.password`
-            // res.writeHead(200);
-            // res.end(JSON.stringify(data));
-        });
-    } else {
-        res.writeHead(403);
-        res.end();
-    }
-});
+//             // now you can access `data.email` and `data.password`
+//             // res.writeHead(200);
+//             // res.end(JSON.stringify(data));
+//         });
+//     } else {
+//         res.writeHead(403);
+//         res.end();
+//     }
+// });
 
 
 Commands.install(Client)
