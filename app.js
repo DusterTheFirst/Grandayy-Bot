@@ -226,15 +226,15 @@ app.get("/feedback", (req, res) => {
     res.sendStatus(405);
 });
 
-app.get('/api', (req, res) => {
-    res.send('API ENDPOINT');    
-});
+// app.get('/api', (req, res) => {
+//     res.send('API ENDPOINT');    
+// });
 
-app.get('/api/guild/', (req, res) => {
+app.get('/guild/', (req, res) => {
     res.send('GUILD INFO');
 });
 
-app.get('/api/users/:userid', (req, res) => {
+app.get(' /users/:userid', (req, res) => {
     res.send('USER INFO FOR USER ' + req.params.userid);
 });
 
