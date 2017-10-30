@@ -10,6 +10,8 @@ const FightResp = require("./res/fightresp.json");
 const Jimp = require("jimp");
 const TwitterPackage = require('twitter');
 
+const dev = true;
+
 var Commands = new Mechan.CommandHandler({
     prefix: "rb.",
     mentionPrefix: false,
@@ -166,31 +168,34 @@ let twitter = [
     //3657556095, //Me
     365956744 //Grandayy
 ];
-Twitter.stream('statuses/filter', { follow: twitter.toString() }, (stream) => {
-    stream.on('data', (tweet) => {
-        if (twitter.includes(tweet.user.id) && !tweet.in_reply_to_screen_name) { // Only tweets from the user id
-            let image_url = "";
-            if (tweet.entities.media !== undefined)
-                image_url = tweet.entities.media[0].media_url;
-            channel.send("", {
-                embed: new Mechan.Discord.RichEmbed()
-                    .setTitle(`${tweet.user.name} has a message for his desciples`)
-                    .setURL(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
-                    .setDescription(replaceMentionsWithLinks(replaceHashtagsWithLinks(tweet.text)))
-                    .setImage(image_url)
-                    .setThumbnail(tweet.user.profile_image_url)
-                    .setColor(tweet.user.profile_background_color)
-                    .setFooter("Twooter\u2122")
-                    .setTimestamp()
-            });
-            console.log(`New tweet from ${tweet.user.name}, ${tweet.text}`);
-        }
-    });
 
-    stream.on('error', (error) => {
-        console.log(error);
+if (!dev) {
+    Twitter.stream('statuses/filter', { follow: twitter.toString() }, (stream) => {
+        stream.on('data', (tweet) => {
+            if (twitter.includes(tweet.user.id) && !tweet.in_reply_to_screen_name) { // Only tweets from the user id
+                let image_url = "";
+                if (tweet.entities.media !== undefined)
+                    image_url = tweet.entities.media[0].media_url;
+                channel.send("", {
+                    embed: new Mechan.Discord.RichEmbed()
+                        .setTitle(`${tweet.user.name} has a message for his desciples`)
+                        .setURL(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
+                        .setDescription(replaceMentionsWithLinks(replaceHashtagsWithLinks(tweet.text)))
+                        .setImage(image_url)
+                        .setThumbnail(tweet.user.profile_image_url)
+                        .setColor(tweet.user.profile_background_color)
+                        .setFooter("Twooter\u2122")
+                        .setTimestamp()
+                });
+                console.log(`New tweet from ${tweet.user.name}, ${tweet.text}`);
+            }
+        });
+    
+        stream.on('error', (error) => {
+            console.log(error);
+        });
     });
-});
+}
 
 Client.on("error", (msg) => { console.log(msg.red); });
 Client.on("warn", (msg) => { console.log(msg.yellow); });
@@ -325,7 +330,7 @@ app.post('/me', (req, res) => {
     res.send('YOU');
 });
 
-app.get('*', function(req, res){
+app.all('*', function(req, res){
     res.status(404).send('404 path not foundified');
 });
 
@@ -396,8 +401,10 @@ let server = https.createServer({
 // });
 
 
-Commands.install(Client)
+if (!dev) {
+    Commands.install(Client)
         .login(Config.token);
+}
 
 
 
