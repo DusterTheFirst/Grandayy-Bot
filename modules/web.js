@@ -15,7 +15,7 @@ module.exports = (client) => {
     app.use(helmet());
 
     app.get('/', (req, res) => {
-        res.sendStatus(404);
+        res.status(404).send('ROBBIE BOTTEN WEBPANEL ENDPOINT');
     });
     
     app.all('/feedback', (req, res) => {
