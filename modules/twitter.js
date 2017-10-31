@@ -1,6 +1,6 @@
 const TwitterPackage = require('twitter');
 
-exports = (config, channel) => {
+module.exports = (config, channel) => {
     var twitter = new TwitterPackage(config.twitter);
 
     let twitteraccounts = [

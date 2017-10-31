@@ -1,6 +1,6 @@
 const Jimp = require("jimp");
 
-exports = (handler) => {
+module.exports = (handler) => {
     handler.createCommand('carrotzy')
         .addParameter('image url', 'optional')
         .setDescription('Carrotzify the image from the url or the attached image')

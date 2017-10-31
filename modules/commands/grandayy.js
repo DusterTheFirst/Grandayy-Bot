@@ -1,6 +1,6 @@
 const Jimp = require("jimp");
 
-exports = (handler) => {
+module.exports = (handler) => {
     handler.createCommand('grandayy')
         .addParameter('image url', 'optional')
         .setDescription('Grandayyify the image from the url or the attached image')

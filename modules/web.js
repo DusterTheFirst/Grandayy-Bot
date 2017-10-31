@@ -1,20 +1,32 @@
-const Mechan = require("mechan.js");
+const Mechan  = require("mechan.js");
 const express = require("express");
-const https = require("https");
-const qs = require('querystring');
-const helmet = require('helmet');
-const fs = require('fs');
+const app     = express();
+const https   = require("https");
+const qs      = require('querystring');
+const helmet  = require('helmet');
+const fs      = require('fs');
+const redis   = require('redis').createClient();
+const limiter = require('express-limiter')(app, redis)
 
-exports = () => {
+module.exports = () => {
     const responses = new Mechan.Discord.WebhookClient('372486252546752518', '1HcfV24CP3IYCZEASOBNmYKiRsAVn-lF7vGT37bTGdum47C6AZpZr6eG9qaeptT-OVxT');
     
     var privateKey = fs.readFileSync('key.crt');
     var certificate = fs.readFileSync('certificate.crt');
     
-    let app = express();
-    
     app.use(helmet());
     
+    limiter({
+        path: '*',
+        method: 'all',
+        lookup: ['connection.remoteAddress'],
+        total: 1,
+        expire: 1000 * 60,
+        onRateLimited: (req, res, next) => {
+          next({ message: 'chill the fucc down', status: 420 })
+        }
+    });
+
     app.get('/', (req, res) => {
         res.sendStatus(404);
     });
@@ -130,4 +142,6 @@ exports = () => {
         key: privateKey,
         cert: certificate
     }, app);
+
+    server.listen(32123);
 }

@@ -1,8 +1,9 @@
 const fs = require('fs');
 
-exports = (handler) => {
-    let files = fs.readdirSync('./commands');
+module.exports = (handler) => {
+    let files = fs.readdirSync(__dirname + '/commands');
     for (let file of files) {
-        require(`./commands/${file}`)(handler);
+        if (fs.lstatSync(__dirname + `/commands/${file}`).isFile())
+            require(__dirname + `/commands/${file}`)(handler);
     }
 }

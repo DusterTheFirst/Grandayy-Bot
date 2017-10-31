@@ -1,4 +1,4 @@
-exports = (handler) => {
+module.exports = (handler) => {
     handler.createCommand('memes')
         .setDescription('Grandayy\'s meme playlist')
         .setCategory('Helpful Links')

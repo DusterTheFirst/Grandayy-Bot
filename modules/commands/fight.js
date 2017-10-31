@@ -1,5 +1,5 @@
-exports = (handler) => {
-    const FightResp = require("./res/fightresp.json");
+module.exports = (handler) => {
+    const FightResp = require(__dirname + "/res/fightresp.json");
 
     handler.createCommand('fight')
         .addParameter('player one', 'required')

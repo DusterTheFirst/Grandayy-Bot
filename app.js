@@ -1,5 +1,5 @@
 const Mechan = require("mechan.js");
-const config = require("./config.json");
+const config = require(__dirname + "/config.json");
 
 var handler = new Mechan.CommandHandler({
     prefix: "rb.",
@@ -10,13 +10,13 @@ var handler = new Mechan.CommandHandler({
 var client = new Mechan.Discord.Client();
 
 //  LOAD COMMANDS
-require('./commandloader')(handler);
+require(__dirname + '/modules/commandloader')(handler);
 
 //  LOAD EVENT HANDLERS (NESTED: init twitter)
-require('./modules/events')(handler, client);
+require(__dirname + '/modules/events')(handler, client, config);
 
-//  CREATE WEBSITE
-require('./modules/web')();
+//  START WEBSERVER
+require(__dirname + '/modules/web')();
 
 handler.install(client)
     .login(config.token);

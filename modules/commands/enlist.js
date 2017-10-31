@@ -1,4 +1,4 @@
-exports = (handler) => {
+module.exports = (handler) => {
     handler.createCommand('enlist')
         .setDescription('Enlist yourself')
         .setCategory('Hidden Commands')

@@ -1,4 +1,4 @@
-exports = (handler) => {
+module.exports = (handler) => {
     handler.createCommand('info')
         .setDescription('Get some of dat info')
         .setCategory('Info Commands')
