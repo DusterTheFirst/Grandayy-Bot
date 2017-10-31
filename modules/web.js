@@ -15,7 +15,10 @@ module.exports = (client) => {
     app.use(helmet());
 
     app.get('/', (req, res) => {
-        res.status(404).send('ROBBIE BOTTEN WEBPANEL ENDPOINT');
+        res.writeHead(303, {
+            Location: 'https://grandayy.github.io/'
+        });
+        res.end();
     });
     
     app.all('/feedback', (req, res) => {
