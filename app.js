@@ -16,7 +16,7 @@ require(__dirname + '/modules/commandloader')(handler);
 require(__dirname + '/modules/events')(handler, client, config);
 
 //  START WEBSERVER
-require(__dirname + '/modules/web')();
+require(__dirname + '/modules/web')(client);
 
 handler.install(client)
     .login(config.token);

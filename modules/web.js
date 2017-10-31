@@ -5,27 +5,14 @@ const https   = require("https");
 const qs      = require('querystring');
 const helmet  = require('helmet');
 const fs      = require('fs');
-const redis   = require('redis').createClient();
-const limiter = require('express-limiter')(app, redis)
 
-module.exports = () => {
+module.exports = (client) => {
     const responses = new Mechan.Discord.WebhookClient('372486252546752518', '1HcfV24CP3IYCZEASOBNmYKiRsAVn-lF7vGT37bTGdum47C6AZpZr6eG9qaeptT-OVxT');
     
     var privateKey = fs.readFileSync('key.crt');
     var certificate = fs.readFileSync('certificate.crt');
     
     app.use(helmet());
-    
-    limiter({
-        path: '*',
-        method: 'all',
-        lookup: ['connection.remoteAddress'],
-        total: 1,
-        expire: 1000 * 60,
-        onRateLimited: (req, res, next) => {
-          next({ message: 'chill the fucc down', status: 420 })
-        }
-    });
 
     app.get('/', (req, res) => {
         res.sendStatus(404);
@@ -57,27 +44,31 @@ module.exports = () => {
     
             client.guilds.find('id', '306061550693777409').fetchMembers();
     
-            https.request({
+            https.get({
                 hostname: 'discordapp.com',
                 path: '/api/v6/users/@me',
-                method: 'GET',
                 headers: {
                     Authorization: request.token + " " + request.type
                 }
-            }, (res) => {
-                let response = "";
-    
-                req.on('data', (chunk) => {
-                    response += chunk;
+            }, (response) => {
+                let body = "";
+
+                if (response.statusCode === 401) {
+                    res.status(401).end('Invalid credentials');
+                    return;
+                }
+
+                response.on('data', (chunk) => {
+                    body += chunk;
                 });
-                req.on('end', () => {
-                    response = JSON.parse(response);
-                    console.log(response);
+                response.on('end', () => {
+                    body = JSON.parse(body);
+                    console.log(body);
     
-                    let member = client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === request.tag.toLowerCase());
+                    let member = client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === body.tag.toLowerCase());
                     
                     if (!member) {
-                        res.end('<h1>You must be in the server to submit feedback</h1>')
+                        res.status(401).end('You must be in the server to submit feedback')
                         return;
                     }
             
