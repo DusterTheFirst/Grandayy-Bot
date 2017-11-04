@@ -1,12 +1,10 @@
 const TwitterPackage = require('twitter');
+const Mechan = require('mechan.js');
 
 module.exports = (config, channel) => {
     var twitter = new TwitterPackage(config.twitter);
 
-    let twitteraccounts = [
-        //3657556095, //Me
-        365956744 //Grandayy
-    ];
+    let twitteraccounts = config.twitter.users;
     
     twitter.stream('statuses/filter', { follow: twitteraccounts.toString() }, (stream) => {
         stream.on('data', (tweet) => {
@@ -16,7 +14,7 @@ module.exports = (config, channel) => {
                     image_url = tweet.entities.media[0].media_url;
                 channel.send("", {
                     embed: new Mechan.Discord.RichEmbed()
-                        .setTitle(`${tweet.user.name} has a message for his desciples`)
+                        .setTitle(`${tweet.user.name} tweeted`)
                         .setURL(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
                         .setDescription(replaceMentionsWithLinks(replaceHashtagsWithLinks(tweet.text)))
                         .setImage(image_url)
@@ -33,11 +31,11 @@ module.exports = (config, channel) => {
             console.log(error);
         });
     });
+}
 
-    function replaceMentionsWithLinks(text) {
-        return text.replace(/@([a-z\d_]+)/ig, '[@$1](http://twitter.com/$1)');
-    }
-    function replaceHashtagsWithLinks(text) {
-        return text.replace(/#([a-z\d_]+)/ig, '[#$1](https://twitter.com/hashtag/$1)');
-    }
+function replaceMentionsWithLinks(text) {
+    return text.replace(/@([a-z\d_]+)/ig, '[@$1](http://twitter.com/$1)');
+}
+function replaceHashtagsWithLinks(text) {
+    return text.replace(/#([a-z\d_]+)/ig, '[#$1](https://twitter.com/hashtag/$1)');
 }

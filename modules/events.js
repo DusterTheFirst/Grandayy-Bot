@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 
-module.exports = (handler, client, config) => {
+module.exports = (handler, client, config, database) => {
     handler.on('debug', console.log);
     handler.on('warn', console.warn);
     handler.on('error', console.error);
@@ -17,6 +17,9 @@ module.exports = (handler, client, config) => {
         client.user.setGame("cult of purple", "https://www.twitch.tv/discordapp");
     
         //  LOAD TWITTER MODULE
-        require(__dirname + '/twitter')(config, client.guilds.first().channels.find('id', config.twitter.channel));
+        require(__dirname + '/twitter')(config, client.channels.find('id', config.twitter.channel));
+
+        //  START WEBSERVER
+        require(__dirname + '/web')(client, config, client.channels.find('id', config.youtube.channel), client.channels.find('id', config.feedbackchannel), database);
     });
 }

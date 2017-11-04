@@ -1,6 +1,5 @@
 config.json
-temp.*
-OLD/
+data/
 *.crt
 
 ## Ignore Visual Studio temporary files, build results, and
