@@ -33,6 +33,12 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
       extended: true
     })); 
 
+    app.use((req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+    
     app.get('/', (req, res) => {
         res.send(error(`This is the endpoint for accessing and sending data to and from @Robbie Botten#3585`,
                        `You may be looking for ${url('https://grandayy.github.io/')}`));
@@ -42,7 +48,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
         var contype = req.headers['content-type'];
 
         if (contype === 'application/json') {
-            res.contentType('json').send(JSON.stringify(getRoutes(app)));
+            res.contentType('json').send(getRoutes(app));
         } else {
             let html = "<h1>Endpoints</h1>";
             
@@ -62,7 +68,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     });
     
     app.get('/guild', (req, res) => {
-        res.contentType('json').send(trimGuild(guild));
+        res.contentType('text').send(trimGuild(guild));
     });
     
     // app.get('/users', (req, res) => {
@@ -100,13 +106,17 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
         guild.fetchMembers();
         res.contentType('json').send(guild.members.filter(x => x.user.tag.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
     });
+    // app.get('/users/withids/:listofids', (req, res) => {
+    //     guild.fetchMembers();
+    //     let ids = req.params.listofids.split(',');
+    //     res.contentType('json').send(ids.map(x => {
+    //         let member = guild.members.find(x => x.id.toLowerCase() === req.params.userid.toLowerCase());
+    //         return member ? trimMember(member) : {}
+    //     }));
+    // });
     app.get('/user/:userid', (req, res) => {
         guild.fetchMembers();
         let member = guild.members.find(x => x.id.toLowerCase() === req.params.userid.toLowerCase());
-        if (!member) {
-            res.contentType('json').send({});
-            return;
-        }
         // let statuses = Object.keys(config.statuses).filter(x => x.filter(y => member.roles.array().map(x => x.id).includes(y)) !== undefined);
         // let highestStatus = statuses[0];
         //let level = member.roles.array().filter(() => Object.values(config.levels).indexOf());
@@ -381,7 +391,7 @@ function trimMember(member) {
 
 function trimGuild(guild) {
     if (!guild) 
-        return {};
+        return {}
 
     return {
         id:             guild.id,
