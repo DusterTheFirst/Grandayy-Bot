@@ -15,7 +15,7 @@ in all seriousness it has some cool fetures, below are all of the current and pl
  - [x] Basic image manipulation
  - [x] Fight command
  - [x] Enlist command
- - [ ] Webpanel (v2.0)
+ - [ ] Webpanel
  - [ ] API for querying information about the server (v2.0)
  - [ ] User profiles
  
