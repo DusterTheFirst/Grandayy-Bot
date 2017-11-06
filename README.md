@@ -18,6 +18,7 @@ in all seriousness it has some cool fetures, below are all of the current and pl
  - [ ] Webpanel
  - [ ] API for querying information about the server (v2.0)
  - [ ] User profiles
+ - [ ] Ban and warn management
  
 (v2.0) means it is currently in development but is in a functional state
 
