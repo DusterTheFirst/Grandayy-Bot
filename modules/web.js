@@ -11,7 +11,11 @@ const pubsubhubbub = require('pubsubhubbub');
 const xml2js       = require('xml2js');
 const googleapis   = require('googleapis');
 
+var configuration;
+
 module.exports = (client, config, youtubechannel, feedbackchannel, database) => {
+    configuration = config;
+
     const guild = client.guilds.find('id', config.guild);
 
     const youtube = googleapis.youtube({
@@ -58,15 +62,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     });
     
     app.get('/guild', (req, res) => {
-        res.contentType('json').send({
-            icon: guild.iconURL,
-            id: guild.id,
-            createdAt: guild.createdAt,
-            emoji: guild.emoji,
-            membercount: guild.membercount,
-            name: guild.name,
-            region: guild.region
-        });
+        res.contentType('json').send(trimGuild(guild));
     });
     
     // app.get('/users', (req, res) => {
@@ -75,12 +71,10 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     // });
 
     app.get('/users/withrole/:roleid', (req, res) => {
-        //res.send('USERS WITH ROLE' + req.params.roleid);
         guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.roles.array().map(x => x.id).includes(req.params.roleid)).map(x => x.id));
+        res.contentType('json').send(guild.members.filter(x => x.roles.array().map(x => x.id).includes(req.params.roleid)).map(trimMember));
     });
-    app.get('/users/withstatus/:status', (req, res) => {
-        //res.send('ALL members with the status ' + req.params.status);
+    app.get('/users/ofstatus/:status', (req, res) => {
         let roles = config.statuses[req.params.status];
 
         if (!roles) {
@@ -88,10 +82,35 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
             return;
         }
         guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.roles.array().find(x => roles.includes(x.id)) !== undefined).map(x => x.id));
+        res.contentType('json').send(guild.members.filter(x => x.roles.array().find(x => roles.includes(x.id)) !== undefined).map(trimMember));
+    });
+    app.get('/users/withdisplayname/:name', (req, res) => {
+        guild.fetchMembers();
+        res.contentType('json').send(guild.members.filter(x => x.displayName.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
+    });
+    app.get('/users/withusername/:name', (req, res) => {
+        guild.fetchMembers();
+        res.contentType('json').send(guild.members.filter(x => x.user.username.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
+    });
+    app.get('/users/withnickname/:name', (req, res) => {
+        guild.fetchMembers();
+        res.contentType('json').send(guild.members.filter(x => x.nickname ? x.nickname.toLowerCase().includes(req.params.name.toLowerCase()) : false).map(trimMember));
+    });
+    app.get('/users/withtag/:name', (req, res) => {
+        guild.fetchMembers();
+        res.contentType('json').send(guild.members.filter(x => x.user.tag.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
     });
     app.get('/user/:userid', (req, res) => {
-        res.send('USER INFO FOR USER ' + req.params.userid);
+        guild.fetchMembers();
+        let member = guild.members.find(x => x.id.toLowerCase() === req.params.userid.toLowerCase());
+        if (!member) {
+            res.contentType('json').send({});
+            return;
+        }
+        // let statuses = Object.keys(config.statuses).filter(x => x.filter(y => member.roles.array().map(x => x.id).includes(y)) !== undefined);
+        // let highestStatus = statuses[0];
+        //let level = member.roles.array().filter(() => Object.values(config.levels).indexOf());
+        res.contentType('json').send(trimMember(member));
     });
 
     app.get('/bans', (req, res) => {
@@ -104,26 +123,12 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     
     app.get('/roles', (req, res) => {
         guild.fetchMembers();
-        res.contentType('json').send(guild.roles.map(x => {
-            return {
-                id: x.id, 
-                color: x.color, 
-                hexColor: x.hexColor,
-                name: x.name,
-                hoist: x.hoist
-            }
-        }));
+        res.contentType('json').send(guild.roles.map(trimRole));
     });
     app.get('/role/:roleid', (req, res) => {
         guild.fetchMembers();
         let role = guild.roles.find(x => x.id.toLowerCase() === req.params.roleid.toLowerCase());
-        res.contentType('json').send(role ? {
-            id: role.id, 
-            color: role.color, 
-            hexColor: role.hexColor,
-            name: role.name,
-            hoist: role.hoist
-        } : {});
+        res.contentType('json').send(trimRole(role));
     });
 
     app.get('/statuses', (req, res) => {
@@ -207,7 +212,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
             });
             console.log(`New video from ${video.author[0].name}, ${video.title[0]}`);
 
-            console.log(video);
+            //console.log(video);
         });
     });
 
@@ -306,4 +311,85 @@ function error(error, body) {
 }
 function url(url) {
     return `<a href="${url}">${url}</a>`;
+}
+
+
+function trimRole(role) {
+    if (!role)
+        return {};
+
+    return {
+        id:         role.id, 
+        color:      role.color, 
+        hexColor:   role.hexColor,
+        name:       role.name,
+        hoist:      role.hoist
+    };
+}
+
+function trimMember(member) {
+    if (!member)
+        return {};
+
+    let userLevel = "0";
+    let levelColor = undefined;
+    for (level of Object.keys(configuration.levels).reverse()) {
+        if (member.roles.array().map(x => x.id).includes(configuration.levels[level])) {
+            userLevel = level;
+            levelColor = member.roles.find(x => x.id === configuration.levels[level]).hexColor;
+            break;
+        }
+    }
+    let userStatus = [];
+    let topStatus;
+    for (status in configuration.statuses) {
+        for (statusrole of configuration.statuses[status]) {
+            if (member.roles.array().map(x => x.id).includes(statusrole)) {
+                userStatus.push(status);
+
+                if (!topStatus)
+                    topStatus = status;
+
+                break;
+            }
+        }
+    }
+
+    return {
+        tag:            member.user.tag,
+        discriminator:  member.user.discriminator,
+        username:       member.user.username,
+        nickname:       member.nickname,
+        displayName:    member.displayName,
+        id:             member.id, 
+        presence:       member.presence,
+        color:          member.displayColor,
+        colorHex:       member.displayHexColor,
+        avatar:         member.user.displayAvatarURL,
+        roles:          member.roles.array().map(x => x.id),
+        highestRole:    member.highestRole.id,
+        hoistRole:      member.hoistRole.id,
+        joined:         member.joinedAt,
+        created:        member.user.createdAt,
+        bot:            member.user.bot,
+        level:          userLevel,
+        levelColor:     levelColor,
+        statuses:       userStatus,
+        displayStatus:  topStatus
+    };
+}
+
+function trimGuild(guild) {
+    if (!guild) 
+        return {};
+
+    return {
+        id:             guild.id,
+        name:           guild.name,
+        icon:           guild.iconURL,
+        createdAt:      guild.createdAt,
+        //emoji:        guild.emoji,
+        membercount:    guild.membercount,
+        region:         guild.region
+    };
 }
