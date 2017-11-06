@@ -17,8 +17,9 @@ in all seriousness it has some cool fetures, below are all of the current and pl
  - [x] Enlist command
  - [ ] Webpanel (v2.0)
  - [ ] API for querying information about the server (v2.0)
+ - [ ] User profiles
  
-(v2.0) is currently in development but is in a functional state
+(v2.0) means it is currently in development but is in a functional state
 
 API endpoint is accessable at its current state at https://dusterthefirst.ddns.net:8080/endpoints
 
