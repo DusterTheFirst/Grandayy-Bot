@@ -376,7 +376,7 @@ function trimMember(member) {
         color:          member.displayColor,
         colorHex:       member.displayHexColor,
         avatar:         member.user.displayAvatarURL,
-        roles:          member.roles.array().map(x => x.id),
+        roles:          member.roles.array().map(trimRole),
         highestRole:    member.highestRole.id,
         hoistRole:      member.hoistRole.id,
         joined:         member.joinedAt,
