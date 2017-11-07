@@ -22,6 +22,6 @@ in all seriousness it has some cool fetures, below are all of the current and pl
  
 (v2.0) means it is currently in development but is in a functional state
 
-API endpoint is accessable at its current state at https://dusterthefirst.ddns.net:8080/endpoints
+API endpoint is accessable at its current state at https://dusterthefirst.ddns.net:8080
 
 You can access all of the endpoints [here](https://dusterthefirst.ddns.net:8080/endpoints)
