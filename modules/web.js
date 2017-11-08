@@ -76,44 +76,65 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     //     res.contentType('json').send(guild.members.map(x => x.user.id));
     // });
 
-    app.get('/users/withrole/:roleid', (req, res) => {
+    app.get('/users', (req, res) => {
         guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.roles.array().map(x => x.id).includes(req.params.roleid)).map(trimMember));
-    });
-    app.get('/users/ofstatus/:status', (req, res) => {
-        let roles = config.statuses[req.params.status];
+        console.log(req.query);
 
-        if (!roles) {
-            res.contentType('json').send([]);
-            return;
+        let members = guild.members;
+        let params = [
+            "role", 
+            "status", 
+            "displayName", 
+            "username", 
+            "nickname",
+            "bot",
+            "level",
+            "underLevel",
+            "aboveLevel"
+        ];
+        
+        if (req.query.role) {
+            if (typeof req.query.role === typeof []) {
+                members = members.filter(x => req.query.role.every(v => x.roles.array().map(x => x.id).includes(v)));
+            } else {
+                members = members.filter(x => x.roles.array().map(x => x.id).includes(req.query.role));
+            }
         }
-        guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.roles.array().find(x => roles.includes(x.id)) !== undefined).map(trimMember));
+        if (req.query.status) {
+            if (typeof req.query.status === typeof []) {
+                members = members.filter(x => req.query.status.every(v => trimMember(x).statuses.includes(v)));
+            } else {
+                members = members.filter(x => trimMember(x).statuses.includes(req.query.status));
+            }
+        }
+        if (req.query.displayName) {
+            members = members.filter(x => x.displayName.toLowerCase().includes(req.query.displayName.toLowerCase()));
+        }
+        if (req.query.username) {
+            members = members.filter(x => x.user.username.toLowerCase().includes(req.query.username.toLowerCase()));
+        }
+        if (req.query.nickname) {
+            members = members.filter(x => x.nickname.toLowerCase().includes(req.query.nickname.toLowerCase()));
+        }
+        if (req.query.bot !== undefined) {
+            members = members.filter(x => (req.query.bot.toLowerCase() == 'true') === x.user.bot);
+        }
+        if (req.query.level) {
+            members = members.filter(x => parseInt(trimMember(x).level) === parseInt(req.query.level));
+        }
+        if (req.query.underLevel) {
+            members = members.filter(x => parseInt(trimMember(x).level) < parseInt(req.query.underLevel));
+        }
+        if (req.query.aboveLevel) {
+            members = members.filter(x => parseInt(trimMember(x).level) > parseInt(req.query.aboveLevel));            
+        }
+        
+
+        if (!Object.keys(req.query).some(x => params.includes(x)))
+            res.send({error: "missing parameters", parameters: params})
+        else
+            res.send(members.map(trimMember));
     });
-    app.get('/users/withdisplayname/:name', (req, res) => {
-        guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.displayName.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
-    });
-    app.get('/users/withusername/:name', (req, res) => {
-        guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.user.username.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
-    });
-    app.get('/users/withnickname/:name', (req, res) => {
-        guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.nickname ? x.nickname.toLowerCase().includes(req.params.name.toLowerCase()) : false).map(trimMember));
-    });
-    app.get('/users/withtag/:name', (req, res) => {
-        guild.fetchMembers();
-        res.contentType('json').send(guild.members.filter(x => x.user.tag.toLowerCase().includes(req.params.name.toLowerCase())).map(trimMember));
-    });
-    // app.get('/users/withids/:listofids', (req, res) => {
-    //     guild.fetchMembers();
-    //     let ids = req.params.listofids.split(',');
-    //     res.contentType('json').send(ids.map(x => {
-    //         let member = guild.members.find(x => x.id.toLowerCase() === req.params.userid.toLowerCase());
-    //         return member ? trimMember(member) : {}
-    //     }));
-    // });
     app.get('/user/:userid', (req, res) => {
         guild.fetchMembers();
         let member = guild.members.find(x => x.id.toLowerCase() === req.params.userid.toLowerCase());
@@ -305,7 +326,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
 
     app.use((err, req, res, next) => {
         console.error(chalk.red(err.stack));
-        res.status(500).contentType('html').send(error("500, Internal error", ``));
+        res.status(500).contentType('html').send(error("500, Internal error", `${err.name}: ${err.message}`));
     })
     
     let server = https.createServer({
@@ -378,7 +399,7 @@ function trimMember(member) {
         avatar:         member.user.displayAvatarURL,
         roles:          member.roles.array().map(trimRole),
         highestRole:    member.highestRole.id,
-        hoistRole:      member.hoistRole.id,
+        hoistRole:      member.hoistRole ? member.hoistRole.id : undefined,
         joined:         member.joinedAt,
         created:        member.user.createdAt,
         bot:            member.user.bot,
