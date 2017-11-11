@@ -19,7 +19,7 @@ const tableSource = new EnmapLevel({name: "bottendatabase"});
 const database = new Enmap({provider: tableSource, persistent: true});
 
 //  LOAD COMMANDS
-require(__dirname + '/modules/commandloader')(handler, database);
+require(__dirname + '/modules/commandloader')(handler, database, client);
 
 //  LOAD EVENT HANDLERS (NESTED: init twitter)
 require(__dirname + '/modules/events')(handler, client, config, database);

@@ -78,7 +78,6 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
 
     app.get('/users', (req, res) => {
         guild.fetchMembers();
-        console.log(req.query);
 
         let members = guild.members;
         let params = [
@@ -131,25 +130,26 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
         
 
         if (!Object.keys(req.query).some(x => params.includes(x)))
-            res.send({error: "missing parameters", parameters: params})
+            res.send({error: "missing GET parameters", parameters: params})
         else
             res.send(members.map(trimMember));
     });
     app.get('/user/:userid', (req, res) => {
         guild.fetchMembers();
-        let member = guild.members.find(x => x.id.toLowerCase() === req.params.userid.toLowerCase());
-        // let statuses = Object.keys(config.statuses).filter(x => x.filter(y => member.roles.array().map(x => x.id).includes(y)) !== undefined);
-        // let highestStatus = statuses[0];
-        //let level = member.roles.array().filter(() => Object.values(config.levels).indexOf());
+        let member = guild.members.find(x => x.id === req.params.userid);
         res.contentType('json').send(trimMember(member));
     });
 
     app.get('/bans', (req, res) => {
-        res.send('ALL BANNED MEMBERS');
+        // guild.fetchAuditLogs({type: [22, 23]}).then(audits => {
+        //     res.contentType('json').send(audits);
+        //     console.log(audits);
+        // });
+        res.send('WHERE WE STOOR');
     });
 
     app.get('/warns', (req, res) => {
-        res.send('ALL WARNNED MEMBERS');
+        res.send('HECCING DO');
     });
     
     app.get('/roles', (req, res) => {
@@ -158,7 +158,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     });
     app.get('/role/:roleid', (req, res) => {
         guild.fetchMembers();
-        let role = guild.roles.find(x => x.id.toLowerCase() === req.params.roleid.toLowerCase());
+        let role = guild.roles.find(x => x.id === req.params.roleid);
         res.contentType('json').send(trimRole(role));
     });
 
@@ -168,11 +168,37 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     });
 
     app.get('/info', (req, res) => {
-        res.send('Bot info');
+        res.send({
+            member: trimMember(guild.me),
+            guild: trimGuild(guild),
+            uptime: process.uptime()
+        });
     });
 
     app.get('/me', (req, res) => {
-        res.send('YOU');
+        if (!req.query.token_type || !req.query.access_token) {
+            res.contentType('json').send({error: "missing GET parameters", parameters: ["token_type", "access_token"]});
+            return;
+        }
+
+        https.request({
+            host: "discordapp.com",
+            path: "/api/v6/users/@me",
+            headers: {
+                Authorization: req.query.token_type + " " + req.query.access_token
+            }
+        }, (response) => {
+            let data = "";
+            response.on('data', (chunk) => {
+                data += chunk;
+            });
+            response.on('end', () => {
+                data = JSON.parse(data);
+                
+                let member = guild.members.find(x => x.id === data.id);
+                res.contentType('json').send(trimMember(member));
+            })
+        }).end();
     });
 
 //#region pubsubhubbub
@@ -420,7 +446,7 @@ function trimGuild(guild) {
         icon:           guild.iconURL,
         createdAt:      guild.createdAt,
         //emoji:        guild.emoji,
-        membercount:    guild.membercount,
+        membercount:    guild.members.array().length,
         region:         guild.region
     };
 }

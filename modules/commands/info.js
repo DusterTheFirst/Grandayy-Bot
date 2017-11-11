@@ -1,4 +1,6 @@
-module.exports = (handler) => {
+Mechan = require('mechan.js');
+
+module.exports = (handler, database, client) => {
     handler.createCommand('info')
         .setDescription('Get some of dat info')
         .setCategory('Info Commands')
@@ -9,12 +11,12 @@ module.exports = (handler) => {
             var uptime = (time + "").toHHMMSS();
         
             builder.setTitle("Robbie Botten - Info");
-            builder.setColor(message.guild.me.displayColor);
-            builder.setDescription(`Robbie Botten is a discord bot designed for Grandayy's discord server. Type ***${Commands.prefix}help***`);
-            builder.setThumbnail(Client.user.displayAvatarURL);
-            builder.addField("Bot Info", "Written In: *[javascript](https://www.javascript.com/), running the [node.js](https://nodejs.org/en/) framework*\nVersion: *Fuck knows*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[Mechan.js](https://github.com/DusterTheFirst/mechan.js)*\nSource Code: *[All Versions](https://github.com/DusterTheFirst/RobbieBotten)* or *[Node Version](https://github.com/DusterTheFirst/RobbieBotten/tree/master/Robbie%20Botten%20JS)*", true);
-            builder.addField("Stats", `Uptime: *${uptime}*\nPing: *${Client.ping}ms*\nLines: *Wayy too many*\nTime Wasted: *A lot*`, true);
-            builder.addField("Credits", "Avatar: *Carrotzy*\nBot: *DusterTheFirst*", false);
+            builder.setColor(context.message.guild.me.displayColor);
+            builder.setDescription(`Robbie Botten is a discord bot designed for Grandayy's discord server. \nType ***${handler.config.prefix}help*** for all commands`);
+            builder.setThumbnail(client.user.displayAvatarURL);
+            builder.addField("Bot Info", "Written In: *[javascript](https://www.javascript.com/), running the [node.js](https://nodejs.org/en/) framework*\nVersion: *2.0*\nRuns On: *[discord.js](https://discord.js.org/#/)* and *[mechan.js](https://github.com/DusterTheFirst/mechan.js)*\nSource Code: *[GitHub](https://github.com/DusterTheFirst/RobbieBotten)*\nWebpanel: *[grandayy.github.io](https://grandayy.github.io)*", true);
+            builder.addField("Stats", `Uptime: *${uptime}*\nPing: *${client.ping}ms*\nLines: *Wayy too many*\nTime Wasted: *A lot*`, true);
+            builder.addField("Credits", "Avatar: *Carrotzy*\nBot: *DusterTheFirst*\nmechan.js: *DusterTheFirst*\ndiscord.js: *hydrabolt* and contributors", false);
             
             context.channel.send("", { embed: builder });
         });
