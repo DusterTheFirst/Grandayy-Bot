@@ -22,7 +22,7 @@ module.exports = (handler) => {
                     watermark.resize(watermark.bitmap.width / watermark.bitmap.height * (image.bitmap.height / 5), image.bitmap.height / 5);
                     image.composite(watermark, 20, image.bitmap.height - (watermark.bitmap.height + 20))
                         .getBuffer(Jimp.MIME_PNG, (error, buffer) => {
-                            message.channel.send("", {
+                            context.channel.send("", {
                                 files: [{
                                     attachment: buffer,
                                     name: "grandayy.png"
