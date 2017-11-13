@@ -12,7 +12,7 @@ module.exports = (handler, client, config, database) => {
             return;
         console.log(chalk.gray(`[Debug] ${msg}`));
     });
-    client.on("ready", () => {
+    client.once("ready", () => {
         console.log(chalk.green(`Logged in with user ${client.user.username}`));
         client.user.setGame("cult of purple", "https://www.twitch.tv/discordapp");
     
