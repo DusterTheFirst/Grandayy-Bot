@@ -10,7 +10,7 @@ module.exports = (handler) => {
             let imageurl = context.message.attachments.first() ? context.message.attachments.first() : { url: context.args[0] };
             
             if (imageurl === undefined || imageurl === {}) {
-                message.channel.send("**Please attach an image, or give a url to an image**");
+                context.channel.send("**Please attach an image, or give a url to an image**");
                 return;
             }
 
