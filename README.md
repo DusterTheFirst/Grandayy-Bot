@@ -1,3 +1,5 @@
+<img src="https://cdn.discordapp.com/avatars/307231810218360832/8bb66e69ea145c474f33bf1827ff4dbc.webp" align="right">
+
 # Robbie Botten
 
 ### About
