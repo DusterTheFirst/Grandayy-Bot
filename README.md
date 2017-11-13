@@ -22,7 +22,7 @@ in all seriousness it has some cool fetures, below are all of the current and pl
  - [ ] User profiles
  - [ ] Ban and warn management
  
-(v2.0) means it is currently in development but is in a functional state
+(v2.0) means it is complete but not avaliable yet
 
 API endpoint is accessable at its current state at https://dusterthefirst.ddns.net:8080
 
