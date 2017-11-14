@@ -7,9 +7,6 @@ const fs           = require('fs');
 const getRoutes    = require('get-routes');
 const bodyParser   = require('body-parser');
 const chalk        = require('chalk');
-const pubsubhubbub = require('pubsubhubbub');
-const xml2js       = require('xml2js');
-const googleapis   = require('googleapis');
 
 var configuration;
 
@@ -17,11 +14,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     configuration = config;
 
     const guild = client.guilds.find('id', config.guild);
-
-    const youtube = googleapis.youtube({
-        version: 'v3',
-        auth: config.youtube.apikey
-    })
+    
     //const responses = new Mechan.Discord.WebhookClient('372486252546752518', '1HcfV24CP3IYCZEASOBNmYKiRsAVn-lF7vGT37bTGdum47C6AZpZr6eG9qaeptT-OVxT');
     
     var privateKey = fs.readFileSync('key.crt');
@@ -201,81 +194,6 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
         }).end();
     });
 
-//#region pubsubhubbub
-    let pubSubSubscriber = pubsubhubbub.createServer({
-        callbackUrl: config.youtube.callbackurl
-    });
-    for (user of config.youtube.users) {        
-        pubSubSubscriber.unsubscribe(user, config.youtube.hub);
-        
-        //pubSubSubscriber.subscribe(user, config.youtube.hub);
-    }
-
-    pubSubSubscriber.on('error', console.error);
-    pubSubSubscriber.on('denied', console.error);
-
-    pubSubSubscriber.on('subscribe', (data) => {
-        console.log(chalk.yellow(`Subscribed to ${data.topic} for ${data.lease} milliseconds`));
-    });
-    pubSubSubscriber.on('unsubscribe', (data) => {
-        console.log(chalk.red(`Unsubscribed from ${data.topic}`));
-        pubSubSubscriber.subscribe(data.topic, config.youtube.hub);
-    });
-
-    pubSubSubscriber.on('feed', (data) => {
-        // console.log(data);
-        // console.log(data.feed.toString('utf8'));
-        xml2js.parseString(data.feed.toString('utf8'), function (err, result) {
-            if (!result.feed.entry)
-                return;
-
-            let video = result.feed.entry[0];
-
-            youtube.videos.list({
-                part: "snippet",
-                id: video['yt:videoId']
-            },
-            (err, videometa) => {
-                if (err) 
-                    console.error(err);
-                if (videometa) {
-                    youtube.channels.list({
-                        part: "snippet",
-                        id: video['yt:channelId']
-                    },
-                    (err, usermeta) => {
-                        if (err)
-                            console.error(err);
-                        if (usermeta) {
-                            //console.log(JSON.stringify(data.items[0].snippet, undefined, 4));
-                            try {
-                                youtubechannel.send("", {
-                                    embed: new Mechan.Discord.RichEmbed()
-                                        .setTitle(`${video.author[0].name} uploaded a new video`)
-                                        .setURL(video.link[0].$.href)
-                                        .setDescription(video.title[0])
-                                        .setImage(videometa.items[0].snippet.thumbnails.high.url)
-                                        .setThumbnail(usermeta.items[0].snippet.thumbnails.high.url)
-                                        .setColor(16201784)
-                                        .setFooter("YoubeTube\u2122")
-                                        .setTimestamp()
-                                });
-                            } catch (e) {
-                                console.error(e);
-                            }
-                        }
-                    });
-                }
-            });
-            console.log(`New video from ${video.author[0].name}, ${video.title[0]}`);
-
-            //console.log(video);
-        });
-    });
-
-    app.use('/pubsubhubbub', pubSubSubscriber.listener());
-//#endregion
-
     app.post('/feedback', (req, res) => {
         if (!req.body.token || !req.body.type || !req.body.title || !req.body.content) {
             res.status(400);
@@ -355,6 +273,8 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
         res.status(500).contentType('html').send(error("500, Internal error", `${err.name}: ${err.message}`));
     })
     
+    require('./youtube')(config, app);
+
     let server = https.createServer({
         key: privateKey,
         cert: certificate
