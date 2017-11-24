@@ -20,6 +20,6 @@ module.exports = (handler, client, config, database) => {
         require(__dirname + '/twitter')(config, client.channels.find('id', config.twitter.channel));
 
         //  START WEBSERVER
-        require(__dirname + '/web')(client, config, client.channels.find('id', config.youtube.channel), client.channels.find('id', config.feedbackchannel), database);
+        require(__dirname + '/web')(client, config, client.channels.find('id', config.feedbackchannel), database);
     });
 }

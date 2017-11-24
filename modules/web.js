@@ -7,22 +7,13 @@ const fs           = require('fs');
 const getRoutes    = require('get-routes');
 const bodyParser   = require('body-parser');
 const chalk        = require('chalk');
-const pubsubhubbub = require('pubsubhubbub');
-const xml2js       = require('xml2js');
-const googleapis   = require('googleapis');
 
 var configuration;
 
-module.exports = (client, config, youtubechannel, feedbackchannel, database) => {
+module.exports = (client, config, feedbackchannel, database) => {
     configuration = config;
 
     const guild = client.guilds.find('id', config.guild);
-
-    const youtube = googleapis.youtube({
-        version: 'v3',
-        auth: config.youtube.apikey
-    })
-    //const responses = new Mechan.Discord.WebhookClient('372486252546752518', '1HcfV24CP3IYCZEASOBNmYKiRsAVn-lF7vGT37bTGdum47C6AZpZr6eG9qaeptT-OVxT');
     
     var privateKey = fs.readFileSync('key.crt');
     var certificate = fs.readFileSync('certificate.crt');
@@ -41,14 +32,14 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     
     app.get('/', (req, res) => {
         res.send(error(`This is the endpoint for accessing and sending data to and from @Robbie Botten#3585`,
-                       `You may be looking for ${url('https://grandayy.github.io/')}`));
+                       `You may be looking for ${url('https://discord.grande1899.com/')} or ${url('/endpoints')}`));
     });
 
     app.get('/endpoints', (req, res) => {
         var contype = req.headers['content-type'];
 
         if (contype === 'application/json') {
-            res.contentType('json').send(getRoutes(app));
+            res.contentType('application/json').send(getRoutes(app));
         } else {
             let html = "<h1>Endpoints</h1>";
             
@@ -68,7 +59,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     });
     
     app.get('/guild', (req, res) => {
-        res.contentType('text').send(trimGuild(guild));
+        res.contentType('application/json').send(trimGuild(guild));
     });
     
     // app.get('/users', (req, res) => {
@@ -137,12 +128,12 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     app.get('/user/:userid', (req, res) => {
         guild.fetchMembers();
         let member = guild.members.find(x => x.id === req.params.userid);
-        res.contentType('json').send(trimMember(member));
+        res.contentType('application/json').send(trimMember(member));
     });
 
     app.get('/bans', (req, res) => {
         // guild.fetchAuditLogs({type: [22, 23]}).then(audits => {
-        //     res.contentType('json').send(audits);
+        //     res.contentType('application/json').send(audits);
         //     console.log(audits);
         // });
         res.send('WHERE WE STOOR');
@@ -154,17 +145,17 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
     
     app.get('/roles', (req, res) => {
         guild.fetchMembers();
-        res.contentType('json').send(guild.roles.map(trimRole));
+        res.contentType('application/json').send(guild.roles.map(trimRole));
     });
     app.get('/role/:roleid', (req, res) => {
         guild.fetchMembers();
         let role = guild.roles.find(x => x.id === req.params.roleid);
-        res.contentType('json').send(trimRole(role));
+        res.contentType('application/json').send(trimRole(role));
     });
 
     app.get('/statuses', (req, res) => {
         guild.fetchMembers();
-        res.contentType('json').send(Object.keys(config.statuses));
+        res.contentType('application/json').send(Object.keys(config.statuses));
     });
 
     app.get('/info', (req, res) => {
@@ -177,7 +168,7 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
 
     app.get('/me', (req, res) => {
         if (!req.query.token_type || !req.query.access_token) {
-            res.contentType('json').send({error: "missing GET parameters", parameters: ["token_type", "access_token"]});
+            res.contentType('application/json').send({error: "missing GET parameters", parameters: ["token_type", "access_token"]});
             return;
         }
 
@@ -195,86 +186,16 @@ module.exports = (client, config, youtubechannel, feedbackchannel, database) => 
             response.on('end', () => {
                 data = JSON.parse(data);
                 
+                if (data.code === 0) {
+                    res.contentType("application/json").send(data);
+                    return;
+                }
+
                 let member = guild.members.find(x => x.id === data.id);
-                res.contentType('json').send(trimMember(member));
+                res.contentType('application/json').send(trimMember(member));
             })
         }).end();
     });
-
-//#region pubsubhubbub
-    let pubSubSubscriber = pubsubhubbub.createServer({
-        callbackUrl: config.youtube.callbackurl
-    });
-    for (user of config.youtube.users) {        
-        pubSubSubscriber.unsubscribe(user, config.youtube.hub);
-        
-        //pubSubSubscriber.subscribe(user, config.youtube.hub);
-    }
-
-    pubSubSubscriber.on('error', console.error);
-    pubSubSubscriber.on('denied', console.error);
-
-    pubSubSubscriber.on('subscribe', (data) => {
-        console.log(chalk.yellow(`Subscribed to ${data.topic} for ${data.lease} milliseconds`));
-    });
-    pubSubSubscriber.on('unsubscribe', (data) => {
-        console.log(chalk.red(`Unsubscribed from ${data.topic}`));
-        pubSubSubscriber.subscribe(data.topic, config.youtube.hub);
-    });
-
-    pubSubSubscriber.on('feed', (data) => {
-        // console.log(data);
-        // console.log(data.feed.toString('utf8'));
-        xml2js.parseString(data.feed.toString('utf8'), function (err, result) {
-            if (!result.feed.entry)
-                return;
-
-            let video = result.feed.entry[0];
-
-            youtube.videos.list({
-                part: "snippet",
-                id: video['yt:videoId']
-            },
-            (err, videometa) => {
-                if (err) 
-                    console.error(err);
-                if (videometa) {
-                    youtube.channels.list({
-                        part: "snippet",
-                        id: video['yt:channelId']
-                    },
-                    (err, usermeta) => {
-                        if (err)
-                            console.error(err);
-                        if (usermeta) {
-                            //console.log(JSON.stringify(data.items[0].snippet, undefined, 4));
-                            try {
-                                youtubechannel.send("", {
-                                    embed: new Mechan.Discord.RichEmbed()
-                                        .setTitle(`${video.author[0].name} uploaded a new video`)
-                                        .setURL(video.link[0].$.href)
-                                        .setDescription(video.title[0])
-                                        .setImage(videometa.items[0].snippet.thumbnails.high.url)
-                                        .setThumbnail(usermeta.items[0].snippet.thumbnails.high.url)
-                                        .setColor(16201784)
-                                        .setFooter("YoubeTube\u2122")
-                                        .setTimestamp()
-                                });
-                            } catch (e) {
-                                console.error(e);
-                            }
-                        }
-                    });
-                }
-            });
-            console.log(`New video from ${video.author[0].name}, ${video.title[0]}`);
-
-            //console.log(video);
-        });
-    });
-
-    app.use('/pubsubhubbub', pubSubSubscriber.listener());
-//#endregion
 
     app.post('/feedback', (req, res) => {
         if (!req.body.token || !req.body.type || !req.body.title || !req.body.content) {
