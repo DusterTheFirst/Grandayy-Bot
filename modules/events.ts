@@ -1,6 +1,9 @@
+import { Collection, Client } from "discord.js";
+import { CommandHandler } from "mechan.js";
+
 const chalk = require('chalk');
 
-module.exports = (handler, client, config, database) => {
+module.exports = (handler: CommandHandler, client: Client, config: Config, database: Collection<any, any>) => {
     handler.on('debug', console.log);
     handler.on('warn', console.warn);
     handler.on('error', console.error);

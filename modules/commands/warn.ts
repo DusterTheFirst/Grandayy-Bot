@@ -1,25 +1,16 @@
-let Enmap = require('enmap');
-let Mechan = require('mechan.js');
-let Client = Mechan.Discord.Client;
-let Guild = Mechan.Discord.Guild;
-let Message = Mechan.Discord.Message;
-let Handler = Mechan.CommandHandler;
-let Context = Mechan.CommandContext;
+import { CommandHandler, ParameterType, CommandContext } from "mechan.js";
+import { Collection, Client, RichEmbed, Message, Guild } from "discord.js";
 
-/**
- * @typedef Warning
- * @prop {Date} date Date of the warn
- * @prop {String} reason Reason for the warn
- * @prop {String} warned Person who warned
- */
+interface Warning {
+    /** Date of the warn */
+    date: Date,
+    /** Reason for the warn */
+    reason: String,
+    /** Person who warned  */
+    warned: String
+}
 
-/**
- * Function to run on the Initialisation of the command
- * @param {Handler} handler 
- * @param {Enmap} database 
- * @param {Client} client 
- */
-module.exports = (handler, database, client) => {
+module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
     handler.createCommand('resetwarndb')
         .setCategory('Dad Commands')
         .addCheck((context) => context.user.id === '168827261682843648')
@@ -30,7 +21,7 @@ module.exports = (handler, database, client) => {
             /**
              * @param {Message} message 
              */
-            let listenforresp = (message) => {
+            let listenforresp = (message: Message) => {
                 if (message.author.id === context.user.id) {
                     if (message.content.toLowerCase() === "yes") {
                         database.set('warnings', {});
@@ -47,15 +38,15 @@ module.exports = (handler, database, client) => {
     handler.createCommand('warn')
         .setCategory('Warning Commands')
         .addCheck(isMod)
-        .addParameter('member', Mechan.ParameterType.Required)
-        .addParameter('reason', Mechan.ParameterType.Unparsed)
+        .addParameter('member', ParameterType.Required)
+        .addParameter('reason', ParameterType.Unparsed)
         .setDescription('Warn the given member')
         .setCallback((context) => {
-            let member = getGuildMember(context.args[0], context.guild);
+            let member = getGuildMember(context.params.get('member'), context.guild);
             if (!member) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
-                                        .setTitle(`:x: ${context.args[0]} Does not exist in this server`)
+                                        .setTitle(`:x: ${context.params.get('member')} Does not exist in this server`)
                                         .setDescription(`Use \`rb.forcewarn <id> [reason...]\` to force a warn using the user's ID (Use for users who left the server)`));
                 return;
             }
@@ -76,10 +67,10 @@ module.exports = (handler, database, client) => {
             warnsforuser.push({
                 date: new Date(Date.now()).toISOString(),
                 warned: context.user.id,
-                reason: context.args[1]
+                reason: context.params.get('reason')
             });
 
-            context.channel.send(new Mechan.Discord.RichEmbed()
+            context.channel.send(new RichEmbed()
                                     .setColor("#43b581")
                                     .setTitle(`Successfully warned ${member.user.tag}`)
                                     .setDescription(`${member.user.tag} now has ${warnsforuser.length} warning${warnsforuser.length != 1 ? "s" : ""}, check them with \`rb.listwarns ${member.user.id}\``));
@@ -90,15 +81,15 @@ module.exports = (handler, database, client) => {
     handler.createCommand('forcewarn')
         .setCategory('Warning Commands')
         .addCheck(isMod)
-        .addParameter('id', Mechan.ParameterType.Required)
-        .addParameter('reason', Mechan.ParameterType.Unparsed)
+        .addParameter('id', ParameterType.Required)
+        .addParameter('reason', ParameterType.Unparsed)
         .setDescription('Force-Warn the given ID')
         .setCallback((context) => {
-            for (var i = 0; i < context.args[0].length; i++) {
-                if(isNaN(context.args[0][i])) {
-                    context.channel.send(new Mechan.Discord.RichEmbed()
+            for (var i = 0; i < context.params.get('id').length; i++) {
+                if(isNaN(context.params.get('id')[i] as any)) {
+                    context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
-                                        .setTitle(`:x: '${context.args[0]}' is not a valid ID`));
+                                        .setTitle(`:x: '${context.params.get('id')}' is not a valid ID`));
                     return;
                 }
             }
@@ -114,21 +105,21 @@ module.exports = (handler, database, client) => {
             if (!currentwarns[context.guild.id])
                 currentwarns[context.guild.id] = {};
 
-            if (!currentwarns[context.guild.id][context.args[0]])
-                currentwarns[context.guild.id][context.args[0]] = []
+            if (!currentwarns[context.guild.id][context.params.get('id')])
+                currentwarns[context.guild.id][context.params.get('id')] = []
 
-            let warnsforuser = currentwarns[context.guild.id][context.args[0]];
+            let warnsforuser = currentwarns[context.guild.id][context.params.get('id')];
 
             warnsforuser.push({
                 date: new Date(Date.now()).toISOString(),
                 warned: context.user.id,
-                reason: context.args[1]
+                reason: context.params.get('reason')
             });
 
-            context.channel.send(new Mechan.Discord.RichEmbed()
+            context.channel.send(new RichEmbed()
                                     .setColor("#43b581")
-                                    .setTitle(`Successfully warned ${context.args[0]}`)
-                                    .setDescription(`${context.args[0]} now has ${warnsforuser.length} warning${warnsforuser.length > 1 ? "s" : ""}, check them with \`rb.forcelistwarns ${context.args[0]}\``));
+                                    .setTitle(`Successfully warned ${context.params.get('reason')}`)
+                                    .setDescription(`${context.params.get('reason')} now has ${warnsforuser.length} warning${warnsforuser.length > 1 ? "s" : ""}, check them with \`rb.forcelistwarns ${context.params.get('reason')}\``));
 
             database.set('warnings', currentwarns);
         });
@@ -136,14 +127,14 @@ module.exports = (handler, database, client) => {
     handler.createCommand('listwarns')
         .setCategory('Warning Commands')
         .addCheck(isMod)
-        .addParameter('member', Mechan.ParameterType.Required)
+        .addParameter('member', ParameterType.Required)
         .setDescription('Get the warnings for the given member')
         .setCallback((context) => {
-            let member = getGuildMember(context.args[0], context.guild);
+            let member = getGuildMember(context.params.get('member'), context.guild);
             if (!member) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
-                                        .setTitle(`:x: ${context.args[0]} Does not exist in this server`)
+                                        .setTitle(`:x: ${context.params.get('member')} Does not exist in this server`)
                                         .setDescription(`Use \`rb.forcelistwarns <id>\` to list the warnings from a user who left the server`));
                 return;
             }
@@ -154,14 +145,14 @@ module.exports = (handler, database, client) => {
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
                                         .setTitle(`:x: This server has no warnings`));
                 return;
             }
 
             if (!currentwarns[context.guild.id][member.id]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
                                         .setTitle(`:x: ${member.user.tag} has no warnings`));
                 return;
@@ -169,7 +160,7 @@ module.exports = (handler, database, client) => {
 
             let warnsforuser = currentwarns[context.guild.id][member.id];
 
-            let output = new Mechan.Discord.RichEmbed()
+            let output = new RichEmbed()
                             .setColor("#43b581")
                             .setTitle(`Warnings for ${member.user.tag}`)
                             .setDescription(`${member.user.tag} has ${warnsforuser.length} warning${warnsforuser.length != 1 ? "s" : ""}`);
@@ -186,14 +177,14 @@ module.exports = (handler, database, client) => {
     handler.createCommand('forcelistwarns')
         .setCategory('Warning Commands')
         .addCheck(isMod)
-        .addParameter('id', Mechan.ParameterType.Required)
+        .addParameter('id', ParameterType.Required)
         .setDescription('Force-Get the warnings for the given ID')
         .setCallback((context) => {
-            for (var i = 0; i < context.args[0].length; i++) {
-                if(isNaN(context.args[0][i])) {
-                    context.channel.send(new Mechan.Discord.RichEmbed()
+            for (var i = 0; i < context.params.get('id').length; i++) {
+                if(isNaN(context.params.get('id')[i] as any)) {
+                    context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
-                                        .setTitle(`:x: '${context.args[0]}' is not a valid ID`));
+                                        .setTitle(`:x: '${context.params.get('id')}' is not a valid ID`));
                     return;
                 }
             }
@@ -204,25 +195,25 @@ module.exports = (handler, database, client) => {
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
                                         .setTitle(`:x: This server has no warnings`));
                 return;
             }
 
-            if (!currentwarns[context.guild.id][context.args[0]]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+            if (!currentwarns[context.guild.id][context.params.get('id')]) {
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
-                                        .setTitle(`:x: ${context.args[0]} has no warnings`));
+                                        .setTitle(`:x: ${context.params.get('id')} has no warnings`));
                 return;
             }
 
-            let warnsforuser = currentwarns[context.guild.id][context.args[0]];
+            let warnsforuser = currentwarns[context.guild.id][context.params.get('id')];
 
-            let output = new Mechan.Discord.RichEmbed()
+            let output = new RichEmbed()
                             .setColor("#43b581")
-                            .setTitle(`Warnings for ${context.args[0]}`)
-                            .setDescription(`${context.args[0]} has ${warnsforuser.length} warning${warnsforuser.length != 1 ? "s" : ""}`);
+                            .setTitle(`Warnings for ${context.params.get('id')}`)
+                            .setDescription(`${context.params.get('id')} has ${warnsforuser.length} warning${warnsforuser.length != 1 ? "s" : ""}`);
 
             for (let warn of warnsforuser) {
                 if (!warn) continue;
@@ -236,13 +227,13 @@ module.exports = (handler, database, client) => {
     handler.createCommand('listallwarns')
         .setCategory('Warning Commands')
         .addCheck(isMod)
-        .addParameter('u sure bro?', Mechan.ParameterType.Unparsed)
+        .addParameter('u sure bro?', ParameterType.Unparsed)
         .setDescription('List **EVERY SINGLE WARNING**')
         .setCallback((context) => {
             let conf = "yah i know what i am doing and i know i will cause a giant text wall when i run this command and i am in a channel where people will not get mad when i do this";
 
-            if (context.args[0].toLowerCase() !== conf) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+            if (context.params.get('u sure bro?').toLowerCase() !== conf) {
+                context.channel.send(new RichEmbed()
                                         .setColor("#43b581")
                                         .setTitle(`VERIFY YOU ARE LEGIT BY WRITING THE FOLLOWING OUT EXACTLY`)
                                         .setDescription(`rb.listallwarns ***${conf}***`));
@@ -255,7 +246,7 @@ module.exports = (handler, database, client) => {
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
                                         .setTitle(`:x: This server has no warnings`));
                 return;
@@ -266,7 +257,7 @@ module.exports = (handler, database, client) => {
                 if (!warnsforuser) continue;
                 let member = context.guild.members.find('id', id);
                 
-                let output = new Mechan.Discord.RichEmbed()
+                let output = new RichEmbed()
                                 .setColor("#43b581")
                                 .setTitle(`Warnings for ${member && member.user.tag || id}`)
                                 .setDescription(`${member && member.user.tag || id} has ${warnsforuser.length} warning${warnsforuser.length != 1 ? "s" : ""}`);
@@ -284,23 +275,23 @@ module.exports = (handler, database, client) => {
     handler.createCommand('delwarn')
         .setCategory('Warning Commands')
         .addCheck(isMod)
-        .addParameter('member', Mechan.ParameterType.Required)
-        .addParameter('index', Mechan.ParameterType.Unparsed)
+        .addParameter('member', ParameterType.Required)
+        .addParameter('index', ParameterType.Optional)
         .setDescription('Remove the warning from the given member')
         .setCallback((context) => {
-            let member = getGuildMember(context.args[0], context.guild);
+            let member = getGuildMember(context.params.get('member'), context.guild);
             if (!member) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
-                                        .setTitle(`:x: ${context.args[0]} Does not exist in this server`)
+                                        .setTitle(`:x: ${context.params.get('member')} Does not exist in this server`)
                                         .setDescription(`Use \`rb.forcedelwarn <id> <index>\` to force delete a warn using the user's ID`));
                 return;
             }
 
-            if (isNaN(context.args[1]) || context.args[1] === '') {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+            if (isNaN(context.params.get('index')) || !context.params.get('index')) {
+                context.channel.send(new RichEmbed()
                                 .setColor('#f04747')
-                                .setTitle(`:x: '${context.args[1]}' Is not a valid number`));
+                                .setTitle(`:x: '${context.params.get('index')}' Is not a valid number`));
                 return;
             }
 
@@ -310,14 +301,14 @@ module.exports = (handler, database, client) => {
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
                                         .setTitle(`:x: This server has no warnings`));
                 return;
             }
 
             if (!currentwarns[context.guild.id][member.id]) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+                context.channel.send(new RichEmbed()
                                         .setColor('#f04747')
                                         .setTitle(`:x: ${member.user.tag} has no warnings`));
                 return;
@@ -325,43 +316,93 @@ module.exports = (handler, database, client) => {
 
             let warnsforuser = currentwarns[context.guild.id][member.id];
 
-            if (parseInt(context.args[1]) > warnsforuser.length || parseInt(context.args[1]) < 1) {
-                context.channel.send(new Mechan.Discord.RichEmbed()
+            if (parseInt(context.params.get('index')) > warnsforuser.length || parseInt(context.params.get('index')) < 1) {
+                context.channel.send(new RichEmbed()
                                 .setColor('#f04747')
-                                .setTitle(`:x: '${context.args[1]}' Is not between 1 and ${warnsforuser.length}`));
+                                .setTitle(`:x: '${context.params.get('index')}' Is not between 1 and ${warnsforuser.length}`));
                 return;
             }
 
-            warnsforuser.splice(parseInt(context.args[1]) - 1, 1);
+            warnsforuser.splice(parseInt(context.params.get('index')) - 1, 1);
 
             if (warnsforuser.length == 0)
-                currentwarns[context.guild.id][member.id] = undefined;
+                delete currentwarns[context.guild.id][member.id];
 
-            context.channel.send(new Mechan.Discord.RichEmbed()
+            context.channel.send(new RichEmbed()
                                     .setColor("#43b581")
-                                    .setTitle(`Successfully removed warning ${context.args[1]} from ${member.user.tag}`)
-                                    .setDescription(`${member.user.tag} now has ${warnsforuser && warnsforuser.length || 0} warning${warnsforuser && warnsforuser.length || 100 != 1 ? "s" : ""}, check them with \`rb.listwarns ${member.user.id}\``));
+                                    .setTitle(`Successfully removed warning ${context.params.get('index')} from ${member.user.tag}`)
+                                    .setDescription(`${member.user.tag} now has ${warnsforuser && warnsforuser.length || 0} warning${warnsforuser && warnsforuser.length || true ? "s" : ""}, check them with \`rb.listwarns ${member.user.id}\``));
 
             database.set('warnings', currentwarns);
         });
-        //FORCE DEL WARN
+    handler.createCommand('forcedelwarn')
+        .setCategory('Warning Commands')
+        .addCheck(isMod)
+        .addParameter('member', ParameterType.Required)
+        .addParameter('index', ParameterType.Optional)
+        .setDescription('Remove the warning from the given ID')
+        .setCallback((context) => {
+            if (isNaN(context.params.get('index')) || !context.params.get('index')) {
+                context.channel.send(new RichEmbed()
+                                .setColor('#f04747')
+                                .setTitle(`:x: '${context.params.get('index')}' Is not a valid number`));
+                return;
+            }
+
+            /**
+             * @type {{[x: string]: {[x: string]: Warning[]}}}
+             */
+            let currentwarns = database.get('warnings');
+
+            if (!currentwarns[context.guild.id]) {
+                context.channel.send(new RichEmbed()
+                                        .setColor('#f04747')
+                                        .setTitle(`:x: This server has no warnings`));
+                return;
+            }
+
+            if (!currentwarns[context.guild.id][context.params.get('member')]) {
+                context.channel.send(new RichEmbed()
+                                        .setColor('#f04747')
+                                        .setTitle(`:x: ${context.params.get('member')} has no warnings`));
+                return;
+            }
+
+            let warnsforuser = currentwarns[context.guild.id][context.params.get('member')];
+
+            if (parseInt(context.params.get('index')) > warnsforuser.length || parseInt(context.params.get('index')) < 1) {
+                context.channel.send(new RichEmbed()
+                                .setColor('#f04747')
+                                .setTitle(`:x: '${context.params.get('index')}' Is not between 1 and ${warnsforuser.length}`));
+                return;
+            }
+
+            warnsforuser.splice(parseInt(context.params.get('index')) - 1, 1);
+
+            if (warnsforuser.length == 0)
+                delete currentwarns[context.guild.id][context.params.get('member')];
+
+            context.channel.send(new RichEmbed()
+                                    .setColor("#43b581")
+                                    .setTitle(`Successfully removed warning ${context.params.get('member')} from ${context.params.get('member')}`)
+                                    .setDescription(`${context.params.get('member')} now has ${warnsforuser && warnsforuser.length || 0} warning${warnsforuser && warnsforuser.length || true ? "s" : ""}, check them with \`rb.listwarns ${context.params.get('member')}\``));
+
+            database.set('warnings', currentwarns);
+        });
         //ADD TO WEBHOKTHING
 }
 
 /**
  * Checks if the member is a moderator
- * @param {Context} context 
  */
-function isMod(context) {
+function isMod(context: CommandContext) {
     return context.message.member.hasPermission('KICK_MEMBERS');
 }
 
 /**
  * Get a guild member from the given guild
- * @param {String} x Identifter
- * @param {Guild} guild 
  */
-function getGuildMember(x, guild) {
+function getGuildMember(x: string, guild: Guild) {
     let mems = guild.members;
     return mems.get(x)
         || mems.find(m =>

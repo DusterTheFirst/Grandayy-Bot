@@ -1,8 +1,11 @@
-const Mechan       = require("mechan.js");
-const fs           = require('fs');
-const Enmap        = require('enmap');
-const EnmapLevel   = require('enmap-level');
-const config = eval(`
+import * as Mechan from "mechan.js";
+import * as Discord from 'discord.js';
+import * as fs from 'fs';
+
+const Enmap: any = require('enmap');
+const EnmapLevel: any = require('enmap-level');
+
+const config: Config = eval(`
 (function() {
     return ${fs.readFileSync(__dirname + "/config.json").toString('utf-8')}
 }())`);
@@ -10,10 +13,10 @@ const config = eval(`
 var handler = new Mechan.CommandHandler({
     prefix: "rb.",
     mentionPrefix: false,
-    helpMode: 'public',
+    helpMode: Mechan.HelpMode.Public,
     isSelfBot: false
 });
-var client = new Mechan.Discord.Client();
+var client = new Discord.Client();
 
 const tableSource = new EnmapLevel({name: "bottendatabase"});
 const database = new Enmap({provider: tableSource, persistent: true});
@@ -26,3 +29,10 @@ require(__dirname + '/modules/events')(handler, client, config, database);
 
 handler.install(client)
     .login(config.token);
+
+process.on('unhandledRejection', (error, p) => {
+    if (error instanceof Error)
+        console.log(`Unhandled promise rejection: ${error.stack}`);
+    else
+        console.log(`Unhandled promise rejection: ${error}`);
+});

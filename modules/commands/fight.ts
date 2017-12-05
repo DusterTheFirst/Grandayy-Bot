@@ -1,25 +1,17 @@
-let Enmap = require('enmap');
-let Mechan = require('mechan.js');
-let Client = Mechan.Discord.Client;
-let Handler = Mechan.CommandHandler;
+import { CommandHandler, ParameterType } from "mechan.js";
+import { Collection, Client } from "discord.js";
 
-/**
- * Function to run on the Initialisation of the command
- * @param {Handler} handler 
- * @param {Enmap} database 
- * @param {Client} client 
- */
-module.exports = (handler, database, client) => {
+module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
     const FightResp = require(__dirname + "/res/fightresp.json");
 
     handler.createCommand('fight')
-        .addParameter('player one', 'required')
-        .addParameter('player two', 'optional')
+        .addParameter('player one', ParameterType.Required)
+        .addParameter('player two', ParameterType.Optional)
         .setDescription('Make the given person(s) fight to the death')
         .setCategory('Fun Commands')
         .setCallback((context) => {
-            let player1 = context.args[0];
-            let player2 = context.args[1] === '' ? context.message.author.username : context.args[1];
+            let player1 = context.params.get('player one');
+            let player2 = context.params.get('player two') || context.message.author.username;
         
             let out;
         
@@ -33,7 +25,7 @@ module.exports = (handler, database, client) => {
         });
 }
 
-function randomise(items) {
+function randomise(items: any[]) {
     let item = Math.floor(Math.random() * items.length);
     return items[item];
 }

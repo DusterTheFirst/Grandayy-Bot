@@ -1,23 +1,15 @@
-let Enmap = require('enmap');
-let Mechan = require('mechan.js');
-let Client = Mechan.Discord.Client;
-let Handler = Mechan.CommandHandler;
+import { CommandHandler } from "mechan.js";
+import { Collection, Client, RichEmbed } from "discord.js";
 
-/**
- * Function to run on the Initialisation of the command
- * @param {Handler} handler 
- * @param {Enmap} database 
- * @param {Client} client 
- */
-module.exports = (handler, database, client) => {
+module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
     handler.createCommand('info')
         .setDescription('Get some of dat info')
         .setCategory('Info Commands')
         .setCallback((context) => {
-            var builder = new Mechan.Discord.RichEmbed();
+            var builder = new RichEmbed();
             
             var time = process.uptime();
-            var uptime = (time + "").toHHMMSS();
+            var uptime = toHHMMSS(time + "");
         
             builder.setTitle("Robbie Botten - Info");
             builder.setColor(context.message.guild.me.displayColor);
@@ -29,17 +21,17 @@ module.exports = (handler, database, client) => {
             
             context.channel.send("", { embed: builder });
         });
+}
 
-    String.prototype.toHHMMSS = function () {
-        var sec_num = parseInt(this, 10); // don't forget the second param
-        var hours = Math.floor(sec_num / 3600);
-        var minutes = Math.floor((sec_num - hours * 3600) / 60);
-        var seconds = sec_num - hours * 3600 - minutes * 60;
-    
-        if (hours < 10) { hours = "0" + hours; }
-        if (minutes < 10) { minutes = "0" + minutes; }
-        if (seconds < 10) { seconds = "0" + seconds; }
-        var time = hours + ':' + minutes + ':' + seconds;
-        return time;
-    };
+function toHHMMSS(that: string) {
+    var sec_num = parseInt(that, 10); // don't forget the second param
+    var hours: string | number = Math.floor(sec_num / 3600);
+    var minutes: string | number  = Math.floor((sec_num - hours * 3600) / 60);
+    var seconds: string | number  = sec_num - hours * 3600 - minutes * 60;
+
+    if (hours < 10) { hours = "0" + hours; }
+    if (minutes < 10) { minutes = "0" + minutes; }
+    if (seconds < 10) { seconds = "0" + seconds; }
+    var time = hours + ':' + minutes + ':' + seconds;
+    return time;
 }

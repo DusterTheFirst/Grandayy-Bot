@@ -1,16 +1,21 @@
-const Mechan       = require("mechan.js");
-const express      = require("express");
-const app          = express();
-const https        = require("https");
-const helmet       = require('helmet');
-const fs           = require('fs');
-const getRoutes    = require('get-routes');
-const bodyParser   = require('body-parser');
-const chalk        = require('chalk');
+import { Client, Channel, Collection, Guild, GuildMember, TextChannel, RichEmbed, Role } from "discord.js";
+import * as Mechan from "mechan.js";
+import * as express from "express";
+const app = express();
+import * as https from "https";
+import * as helmet from 'helmet';
+import * as fs from 'fs';
+import * as bodyParser from 'body-parser';
+import { NextFunction, Response } from "express";
+import { Request } from "express-serve-static-core";
 
-var configuration;
+const chalk: any = require('chalk');
+const Enmap: any = require('enmap');
+const getRoutes: any = require('get-routes');
 
-module.exports = (client, config, feedbackchannel, database) => {
+var configuration: Config;
+
+module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, database: Collection<any, any>) => {
     configuration = config;
 
     const guild = client.guilds.find('id', config.guild);
@@ -44,11 +49,11 @@ module.exports = (client, config, feedbackchannel, database) => {
             let html = "<h1>Endpoints</h1>";
             
             let routes = getRoutes(app);
-            for (method in routes) {
+            for (let method in routes) {
                 if (method === 'acl')
                    continue;
                 html += `<h2 style="margin-bottom: -5px;">${method.toUpperCase()}</h2><hr>`;
-                for (endpoint of routes[method]) {
+                for (let endpoint of routes[method]) {
                     //console.log(method.toUpperCase() + " " + endpoint);
                     html += "&emsp;" + method.toUpperCase() + " " + url(endpoint) + "<br>"
                 }
@@ -85,14 +90,14 @@ module.exports = (client, config, feedbackchannel, database) => {
         
         if (req.query.role) {
             if (typeof req.query.role === typeof []) {
-                members = members.filter(x => req.query.role.every(v => x.roles.array().map(x => x.id).includes(v)));
+                members = members.filter(x => req.query.role.every((v: string) => x.roles.array().map(x => x.id).includes(v)));
             } else {
                 members = members.filter(x => x.roles.array().map(x => x.id).includes(req.query.role));
             }
         }
         if (req.query.status) {
             if (typeof req.query.status === typeof []) {
-                members = members.filter(x => req.query.status.every(v => trimMember(x).statuses.includes(v)));
+                members = members.filter(x => req.query.status.every((v: string) => trimMember(x).statuses.includes(v)));
             } else {
                 members = members.filter(x => trimMember(x).statuses.includes(req.query.status));
             }
@@ -140,7 +145,7 @@ module.exports = (client, config, feedbackchannel, database) => {
     });
 
     app.get('/warns', (req, res) => {
-        res.send('HECCING DO');
+        res.contentType('application/json').send(database.get('warnings'));
     });
     
     app.get('/roles', (req, res) => {
@@ -184,14 +189,14 @@ module.exports = (client, config, feedbackchannel, database) => {
                 data += chunk;
             });
             response.on('end', () => {
-                data = JSON.parse(data);
+                let parseddata = JSON.parse(data);
                 
-                if (data.code === 0) {
+                if (parseddata.code === 0) {
                     res.contentType("application/json").send(data);
                     return;
                 }
 
-                let member = guild.members.find(x => x.id === data.id);
+                let member = guild.members.find(x => x.id === parseddata.id);
                 res.contentType('application/json').send(trimMember(member));
             })
         }).end();
@@ -228,10 +233,10 @@ module.exports = (client, config, feedbackchannel, database) => {
                 body += chunk;
             });
             response.on('end', () => {
-                body = JSON.parse(body);
-                console.log(body);
+                let parsedbody = JSON.parse(body);
+                console.log(parsedbody);
 
-                let member = client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === body.tag.toLowerCase());
+                let member = client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === parsedbody.tag.toLowerCase());
                 
                 if (!member) {
                     res.status(401).end('You must be in the server to submit feedback')
@@ -244,7 +249,7 @@ module.exports = (client, config, feedbackchannel, database) => {
                 res.end();
         
                 
-                feedbackchannel.send("", new Mechan.Discord.RichEmbed()
+                feedbackchannel.send("", new RichEmbed()
                     .setTitle("TITLE: " + req.body.title)
                     .setDescription(req.body.content)
                     .setColor(13380104)
@@ -255,7 +260,7 @@ module.exports = (client, config, feedbackchannel, database) => {
                     .addField('IP', req.connection.remoteAddress.replace('::ffff:', "")));
         
                 member.send("The admins of " + client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
-                    new Mechan.Discord.RichEmbed()
+                    new RichEmbed()
                     .setTitle("TITLE: " + req.body.title)
                     .setDescription(req.body.content)
                     .setColor(13380104)
@@ -271,7 +276,7 @@ module.exports = (client, config, feedbackchannel, database) => {
                                     `see ${url('/endpoints')} for all endpoints`));
     });
 
-    app.use((err, req, res, next) => {
+    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         console.error(chalk.red(err.stack));
         res.status(500).contentType('html').send(error("500, Internal error", `${err.name}: ${err.message}`));
     })
@@ -284,17 +289,23 @@ module.exports = (client, config, feedbackchannel, database) => {
     server.listen(8080);
 }
 
-function error(error, body) {
+function error(error: string, body: string) {
     return `<h1>${error}</h1>${body}<br><hr><center>Robbie Botten</center>`;
 }
-function url(url) {
+function url(url: string) {
     return `<a href="${url}">${url}</a>`;
 }
 
 
-function trimRole(role) {
+function trimRole(role: Role) {
     if (!role)
-        return {};
+        return {
+            id:         null, 
+            color:      null, 
+            hexColor:   null,
+            name:       null,
+            hoist:      null
+        };;
 
     return {
         id:         role.id, 
@@ -305,13 +316,34 @@ function trimRole(role) {
     };
 }
 
-function trimMember(member) {
+function trimMember(member: GuildMember) {
     if (!member)
-        return {};
+        return {
+            tag:            null,
+            discriminator:  null,
+            username:       null,
+            nickname:       null,
+            displayName:    null,
+            id:             null, 
+            presence:       null,
+            color:          null,
+            colorHex:       null,
+            avatar:         null,
+            roles:          null,
+            highestRole:    null,
+            hoistRole:      null,
+            joined:         null,
+            created:        null,
+            bot:            null,
+            level:          null,
+            levelColor:     null,
+            statuses:       null,
+            displayStatus:  null
+        };;
 
     let userLevel = "0";
     let levelColor = undefined;
-    for (level of Object.keys(configuration.levels).reverse()) {
+    for (let level of Object.keys(configuration.levels).reverse()) {
         if (member.roles.array().map(x => x.id).includes(configuration.levels[level])) {
             userLevel = level;
             levelColor = member.roles.find(x => x.id === configuration.levels[level]).hexColor;
@@ -320,8 +352,8 @@ function trimMember(member) {
     }
     let userStatus = [];
     let topStatus;
-    for (status in configuration.statuses) {
-        for (statusrole of configuration.statuses[status]) {
+    for (let status in configuration.statuses) {
+        for (let statusrole of configuration.statuses[status]) {
             if (member.roles.array().map(x => x.id).includes(statusrole)) {
                 userStatus.push(status);
 
@@ -357,9 +389,17 @@ function trimMember(member) {
     };
 }
 
-function trimGuild(guild) {
+function trimGuild(guild: Guild) {
     if (!guild) 
-        return {}
+        return {
+            id:             null,
+            name:           null,
+            icon:           null,
+            createdAt:      null,
+            //emoji:        null,
+            membercount:    null,
+            region:         null
+        }
 
     return {
         id:             guild.id,

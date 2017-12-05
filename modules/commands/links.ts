@@ -1,15 +1,7 @@
-let Enmap = require('enmap');
-let Mechan = require('mechan.js');
-let Client = Mechan.Discord.Client;
-let Handler = Mechan.CommandHandler;
+import { CommandHandler } from "mechan.js";
+import { Collection, Client } from "discord.js";
 
-/**
- * Function to run on the Initialisation of the command
- * @param {Handler} handler 
- * @param {Enmap} database 
- * @param {Client} client 
- */
-module.exports = (handler, database, client) => {
+module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
     handler.createCommand('memes')
         .setDescription('Grandayy\'s meme playlist')
         .setCategory('Helpful Links')

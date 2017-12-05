@@ -1,34 +1,26 @@
-const Jimp = require("jimp");
-let Enmap = require('enmap');
-let Mechan = require('mechan.js');
-let Client = Mechan.Discord.Client;
-let Handler = Mechan.CommandHandler;
+import { CommandHandler, ParameterType } from "mechan.js";
+import { Collection, Client } from "discord.js";
+import * as Jimp from 'jimp';
 
-/**
- * Function to run on the Initialisation of the command
- * @param {Handler} handler 
- * @param {Enmap} database 
- * @param {Client} client 
- */
-module.exports = (handler, database, client) => {
+module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
     handler.createCommand('carrotzy')
-        .addParameter('image url', 'optional')
+        .addParameter('image url', ParameterType.Optional)
         .setDescription('Carrotzify the image from the url or the attached image')
         .setCategory('Fun Commands')
         .setCallback((context) => {
             context.channel.startTyping();
-            let imageurl = context.message.attachments.first() ? context.message.attachments.first() : { url: context.args[0] };
+            let image = context.message.attachments.first() ? context.message.attachments.first() : { url: context.params.get('image url') };
             
-            if (imageurl === undefined || imageurl === {}) {
+            if (image === undefined || image === {}) {
                 context.channel.send("**Please attach an image, or give a url to an image**");
                 return;
             }
 
-            imageurl = imageurl.url;
+            let imageurl = image.url;
         
             Jimp.read(imageurl).then((image) => {
-                image.pixelate(image.bitmap.height/20)
-                    .getBuffer(Jimp.MIME_PNG, (error, buffer) => {
+                (image as any).pixelate(image.bitmap.height/20)
+                    .getBuffer(Jimp.MIME_PNG, (error: Error, buffer: Buffer) => {
                         context.message.channel.send("", {
                             files: [{
                                 attachment: buffer,
@@ -37,6 +29,9 @@ module.exports = (handler, database, client) => {
                         });
                         context.channel.stopTyping();
                     });
+            }).catch((reason) => {
+                context.message.channel.send(`**${reason}**`);
+                return;
             });
         });
 }
