@@ -1,6 +1,6 @@
 config.json
 data/
-*.cr
+*.crt
 *.js
 
 ## Ignore Visual Studio temporary files, build results, and
