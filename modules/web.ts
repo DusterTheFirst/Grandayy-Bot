@@ -8,14 +8,14 @@ import * as fs from 'fs';
 import * as bodyParser from 'body-parser';
 import { NextFunction, Response } from "express";
 import { Request } from "express-serve-static-core";
+import { Database } from "sqlite3";
 
 const chalk: any = require('chalk');
-const Enmap: any = require('enmap');
 const getRoutes: any = require('get-routes');
 
 var configuration: Config;
 
-module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, database: Collection<any, any>) => {
+module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, database: Database) => {
     configuration = config;
 
     const guild = client.guilds.find('id', config.guild);
@@ -145,7 +145,9 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
     });
 
     app.get('/warns', (req, res) => {
-        res.contentType('application/json').send(database.get('warnings'));
+        database.get('SELECT * FROM warns', (error, row) => {
+            res.contentType('application/json').send(row);
+        });
     });
     
     app.get('/roles', (req, res) => {
@@ -256,7 +258,6 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
                     .setTimestamp()
                     .setThumbnail(member.user.avatarURL)
                     .addField('Author', `${member.user.tag}`)
-                    .addField('User-Agent', req.headers["user-agent"])
                     .addField('IP', req.connection.remoteAddress.replace('::ffff:', "")));
         
                 member.send("The admins of " + client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 

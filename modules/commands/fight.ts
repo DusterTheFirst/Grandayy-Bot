@@ -1,7 +1,8 @@
 import { CommandHandler, ParameterType } from "mechan.js";
 import { Collection, Client } from "discord.js";
+import { Database } from "sqlite3";
 
-module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
+module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     const FightResp = require(__dirname + "/res/fightresp.json");
 
     handler.createCommand('fight')

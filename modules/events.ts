@@ -1,12 +1,18 @@
 import { Collection, Client } from "discord.js";
-import { CommandHandler } from "mechan.js";
+import { CommandHandler, CommandErrorType } from "mechan.js";
+import { Database } from "sqlite3";
+import { default as chalk } from 'chalk';
 
-const chalk = require('chalk');
-
-module.exports = (handler: CommandHandler, client: Client, config: Config, database: Collection<any, any>) => {
-    handler.on('debug', console.log);
-    handler.on('warn', console.warn);
-    handler.on('error', console.error);
+module.exports = (handler: CommandHandler, client: Client, config: Config, database: Database) => {
+    handler.on('failure', (handler, context) => {
+        switch (context.errorType) {
+            case CommandErrorType.BadPermissions:
+            case CommandErrorType.UnknownCommand:
+                break;
+            default:
+                console.log(context.command && context.command.fullname, context.errorType, context.error);
+        }
+    });
 
     client.on("error", (msg) => { console.error(chalk.red(`[Error] ${msg}`)); });
     client.on("warn", (msg) => { console.warn(chalk.yellow(`[Warn] ${msg}`)); });
@@ -17,8 +23,11 @@ module.exports = (handler: CommandHandler, client: Client, config: Config, datab
     });
     client.once("ready", () => {
         console.log(chalk.green(`Logged in with user ${client.user.username}`));
-        client.user.setGame("cult of purple", "https://www.twitch.tv/discordapp");
+        client.user.setGame("discord.grande1899.com", "https://www.twitch.tv/dusterthefirst");
     
+        //  LOAD COMMANDS
+        require(__dirname + '/commandloader')(handler, database, client, config);
+
         //  LOAD TWITTER MODULE
         require(__dirname + '/twitter')(config, client.channels.find('id', config.twitter.channel));
 

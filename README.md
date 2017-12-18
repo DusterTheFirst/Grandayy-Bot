@@ -13,7 +13,7 @@ in all seriousness it has some cool fetures, below are all of the current and pl
 
  - [x] Quick links ([Code](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/commands/links.js))
  - [x] Twitter notifications ([Code](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/twitter.js))
- - [ ] Youtube notifications ([Code](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/web.js#L205)) (v2.0)
+ - ~~[ ] Youtube notifications ([Code](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/web.js#L205)) (v2.0)~~
  - [x] Basic image manipulation ([Grandayy](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/commands/grandayy.js)) ([Carrotzy](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/commands/carrotzy.js))
  - [x] Fight command ([Code](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/commands/fight.js))
  - [x] Enlist command ([Code](https://github.com/DusterTheFirst/RobbieBotten/blob/master/modules/commands/enlist.js))

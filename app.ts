@@ -1,9 +1,9 @@
 import * as Mechan from "mechan.js";
 import * as Discord from 'discord.js';
 import * as fs from 'fs';
-
-const Enmap: any = require('enmap');
-const EnmapLevel: any = require('enmap-level');
+import * as SQLite from "sqlite3";
+import { default as chalk } from 'chalk';
+SQLite.verbose();
 
 const config: Config = eval(`
 (function() {
@@ -11,21 +11,26 @@ const config: Config = eval(`
 }())`);
 
 var handler = new Mechan.CommandHandler({
-    prefix: "rb.",
+    prefix: "-",
     mentionPrefix: false,
     helpMode: Mechan.HelpMode.Public,
     isSelfBot: false
 });
-var client = new Discord.Client();
+var client = new Discord.Client({
+    fetchAllMembers: true
+});
 
-const tableSource = new EnmapLevel({name: "bottendatabase"});
-const database = new Enmap({provider: tableSource, persistent: true});
+var database = new SQLite.Database('./SQL/RobbieBotten.sql');
+database.on('trace', (sql) => console.log(chalk.yellow(sql)));
 
-//  LOAD COMMANDS
-require(__dirname + '/modules/commandloader')(handler, database, client);
+database.serialize(() => {
+    //  LOAD EVENT HANDLERS
+    require(__dirname + '/modules/events')(handler, client, config, database);
+})
 
-//  LOAD EVENT HANDLERS (NESTED: init twitter)
-require(__dirname + '/modules/events')(handler, client, config, database);
+process.on('beforeExit', (code) => {
+    database.close();
+});
 
 handler.install(client)
     .login(config.token);

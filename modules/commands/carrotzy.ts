@@ -1,8 +1,9 @@
 import { CommandHandler, ParameterType } from "mechan.js";
 import { Collection, Client } from "discord.js";
 import * as Jimp from 'jimp';
+import { Database } from "sqlite3";
 
-module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
+module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand('carrotzy')
         .addParameter('image url', ParameterType.Optional)
         .setDescription('Carrotzify the image from the url or the attached image')

@@ -10,7 +10,9 @@ interface Warning {
     warned: String
 }
 
-module.exports = (handler: CommandHandler, database: Collection<any, any>, client: Client) => {
+/*
+/// USE COLLECTIONS NOT LISTS
+module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand('resetwarndb')
         .setCategory('Dad Commands')
         .addCheck((context) => context.user.id === '168827261682843648')
@@ -18,14 +20,15 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
         .hide()
         .setCallback((context) => {
             context.channel.send('u sure?');
-            /**
-             * @param {Message} message 
-             */
             let listenforresp = (message: Message) => {
                 if (message.author.id === context.user.id) {
                     if (message.content.toLowerCase() === "yes") {
-                        database.set('warnings', {});
-                        context.channel.send('k, did');
+                        database.collection('warnings').deleteMany({}).then(() => {
+                            context.channel.send('k, did');
+                        }).catch((reason) => {
+                            context.channel.send('couldn\'t do it dad ;-;');
+                            console.error(reason);
+                        });
                     } else {
                         context.channel.send('i wont then');
                     }
@@ -51,9 +54,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 return;
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id])
@@ -94,9 +94,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 }
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (typeof currentwarns !== typeof {})
@@ -139,9 +136,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 return;
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
@@ -189,9 +183,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 }
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
@@ -240,9 +231,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 return;
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
@@ -295,9 +283,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 return;
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
@@ -349,9 +334,6 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
                 return;
             }
 
-            /**
-             * @type {{[x: string]: {[x: string]: Warning[]}}}
-             */
             let currentwarns = database.get('warnings');
 
             if (!currentwarns[context.guild.id]) {
@@ -391,6 +373,7 @@ module.exports = (handler: CommandHandler, database: Collection<any, any>, clien
         });
         //ADD TO WEBHOKTHING
 }
+*/
 
 /**
  * Checks if the member is a moderator
