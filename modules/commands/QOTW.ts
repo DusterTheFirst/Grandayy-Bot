@@ -101,33 +101,34 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 database.get(`SELECT * FROM qotwpropositions WHERE proposer = ?`, [member.user.id], (error, row: Propisition) => {
                     if (row) {
                         let voted: 'a' | 'n' | 'y';
-                        let yess = row.y.split(',');
-                        let nos = row.n.split(',');
-                        let abstains = row.a.split(',');
+                        let yess = getArrayfromString(row.y);
+                        let nos = getArrayfromString(row.n);
+                        let abstains = getArrayfromString(row.a);
 
                         if (yess.includes(context.member.id)) {
-                            yess.splice(yess.indexOf(context.member.id), 1);
                             voted = 'y';
-                        }
-                        if (nos.includes(context.member.id)) {
-                            nos.splice(yess.indexOf(context.member.id), 1);
+                        } else if (nos.includes(context.member.id)) {
                             voted = 'n';
-                        }
-                        if (abstains.includes(context.member.id)) {
-                            abstains.splice(yess.indexOf(context.member.id), 1);
+                        } else if (abstains.includes(context.member.id)) {
                             voted = 'a';
                         }
+                        
+                        removeFromArray(context.member.id, yess);
+                        removeFromArray(context.member.id, nos);
+                        removeFromArray(context.member.id, abstains);
 
                         if (vote === 'y') 
-                            yess.push(member.user.id);
+                            yess.push(context.member.id);
                         if (vote === 'n')
-                            nos.push(member.user.id);
+                            nos.push(context.member.id);
                         if (vote === 'a')
-                            abstains.push(member.user.id);
+                            abstains.push(context.member.id);
 
-                        database.run(`UPDATE qotwpropositions SET y = ? WHERE proposer = ?`, [yess.join(','), member.user.id]);
-                        database.run(`UPDATE qotwpropositions SET n = ? WHERE proposer = ?`, [nos.join(','), member.user.id]);
-                        database.run(`UPDATE qotwpropositions SET a = ? WHERE proposer = ?`, [abstains.join(','), member.user.id]);
+                        database.run(`UPDATE qotwpropositions SET y = ?, n = ?, a = ? WHERE proposer = ?`, [yess.join(','), nos.join(','), abstains.join(','), member.user.id], () => {
+                            database.get(`SELECT * FROM qotwpropositions WHERE proposer = ?`, [member.user.id], (error, row: Propisition) => {
+                                update(row);
+                            });
+                        });
 
                         if (voted === vote) {
                             context.channel.send(`You already voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
@@ -140,8 +141,9 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         context.channel.send(`**${member.user.tag}** is not proposing a QOTW`);
                     }
                     //context.channel.send(`No one cares that you voted ${context.params.get('vote')} for ${member.user.tag}`);
+                    
+                    //SEND TO STAFF CHANNEL x<y/4 with y>4 TO win
                 });
-                //SEND TO STAFF CHANNEL x<y/4 with y>4 TO win
             });
 
         qotw.createNestedCommand('list propositions')
@@ -166,6 +168,9 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                     .setTitle(`QOTW proposed by ${context.user.tag}`)
                     .setDescription(`**Question:** ${question}\n\n**Command: **-qotw vote ${context.user.tag} [yes|no]`)
                     .setFooter('Awaiting votes...')
+                    .addField('Yes', 0, true)
+                    .addField('No', 0, true)
+                    .addField('Abstain', 0, true)
                     .setTimestamp()
                     .setThumbnail(context.user.avatarURL))
                     .then((m) => {
@@ -198,7 +203,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             if (!rows)
                 embed.setDescription('No propositions');
             else for (let prop of rows) {
-                embed.addField(context.guild.member(prop.proposer).user.tag, prop.question);
+                embed.addField(context.guild.member(prop.proposer).user.tag, `**${prop.question}** - ${prop.y.split(',').length}Y ${prop.n.split(',').length}N ${prop.a.split(',').length}A`);
             }
             
             context.channel.send(embed);
@@ -248,7 +253,37 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             }).catch(console.error);
         });
     }
+
+    function update(proposition: Propisition) {
+        QOTWChannel.fetchMessage(proposition.proposedMSG).then((message) => {
+            let oldEmbed = cleanEmbed(message.embeds[0]);
+            oldEmbed.fields = [];
+            oldEmbed.addField('Yes', getArrayfromString(proposition.y).length, true)
+                    .addField('No', getArrayfromString(proposition.n).length, true)
+                    .addField('Abstain', getArrayfromString(proposition.a).length, true);
+
+            message.edit('', { embed: oldEmbed });
+        }).catch(console.error);
+    }
 };
+
+function getArrayfromString(list: string): string[] {
+    let array = list.split(',');
+    if (array.includes('')) {
+        array.splice(list.indexOf(''), 1);
+    }
+    return array;
+}
+function createStringFromArray(list: string[]): string {
+    let array = list.join(',');
+    return array;
+}
+function removeFromArray(item: string, array: string[]): string[] {
+    while (array.indexOf(item) !== -1) {
+        array.splice(array.indexOf(item), 1);
+    }
+    return array;
+}
 
 interface Propisition {
     /** ID of the proposer */
