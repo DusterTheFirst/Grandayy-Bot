@@ -17,4 +17,4 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         .setDescription('Grande1899\'s meme playlist')
         .setCategory('Helpful Links')
         .setCallback((context) => context.channel.send("https://www.youtube.com/playlist?list=PLAgzw7vzgd5D5qH9Hqmn83yVnYLUaF-gE"));
-}
+};

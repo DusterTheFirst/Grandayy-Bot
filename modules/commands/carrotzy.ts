@@ -35,4 +35,4 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 return;
             });
         });
-}
+};

@@ -23,4 +23,4 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             
             context.channel.send("", { embed: builder });
         });
-}
+};

@@ -3,11 +3,11 @@ import { Collection, Client, RichEmbed, Message, Guild } from "discord.js";
 
 interface Warning {
     /** Date of the warn */
-    date: Date,
+    date: Date;
     /** Reason for the warn */
-    reason: String,
+    reason: String;
     /** Person who warned  */
-    warned: String
+    warned: String;
 }
 
 /*

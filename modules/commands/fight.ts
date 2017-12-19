@@ -24,7 +24,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         
             context.channel.send(out);
         });
-}
+};
 
 function randomise(items: any[]) {
     let item = Math.floor(Math.random() * items.length);

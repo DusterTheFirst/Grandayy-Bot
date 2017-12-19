@@ -55,7 +55,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
                 html += `<h2 style="margin-bottom: -5px;">${method.toUpperCase()}</h2><hr>`;
                 for (let endpoint of routes[method]) {
                     //console.log(method.toUpperCase() + " " + endpoint);
-                    html += "&emsp;" + method.toUpperCase() + " " + url(endpoint) + "<br>"
+                    html += "&emsp;" + method.toUpperCase() + " " + url(endpoint) + "<br>";
                 }
                 html += `<br><br>`;
             }
@@ -126,7 +126,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         
 
         if (!Object.keys(req.query).some(x => params.includes(x)))
-            res.send({error: "missing GET parameters", parameters: params})
+            res.send({error: "missing GET parameters", parameters: params});
         else
             res.send(members.map(trimMember));
     });
@@ -200,7 +200,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
 
                 let member = guild.members.find(x => x.id === parseddata.id);
                 res.contentType('application/json').send(trimMember(member));
-            })
+            });
         }).end();
     });
 
@@ -241,7 +241,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
                 let member = client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === parsedbody.tag.toLowerCase());
                 
                 if (!member) {
-                    res.status(401).end('You must be in the server to submit feedback')
+                    res.status(401).end('You must be in the server to submit feedback');
                     return;
                 }
         
@@ -267,7 +267,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
                     .setColor(13380104)
                     .setTimestamp()
                     .setThumbnail(member.user.avatarURL)
-                    .addField('Author', `${member.user.tag}`))
+                    .addField('Author', `${member.user.tag}`));
             });
         });
     });
@@ -280,7 +280,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         console.error(chalk.red(err.stack));
         res.status(500).contentType('html').send(error("500, Internal error", `${err.name}: ${err.message}`));
-    })
+    });
     
     let server = https.createServer({
         key: privateKey,
@@ -288,7 +288,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
     }, app);
     
     server.listen(8080);
-}
+};
 
 function error(error: string, body: string) {
     return `<h1>${error}</h1>${body}<br><hr><center>Robbie Botten</center>`;
@@ -306,7 +306,7 @@ function trimRole(role: Role) {
             hexColor:   null,
             name:       null,
             hoist:      null
-        };;
+        };
 
     return {
         id:         role.id, 
@@ -340,7 +340,7 @@ function trimMember(member: GuildMember) {
             levelColor:     null,
             statuses:       null,
             displayStatus:  null
-        };;
+        };
 
     let userLevel = "0";
     let levelColor = undefined;
@@ -400,7 +400,7 @@ function trimGuild(guild: Guild) {
             //emoji:        null,
             membercount:    null,
             region:         null
-        }
+        };
 
     return {
         id:             guild.id,

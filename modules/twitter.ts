@@ -31,7 +31,7 @@ module.exports = (config: Config, channel: TextChannel) => {
             console.log(error);
         });
     });
-}
+};
 
 function replaceMentionsWithLinks(text: string) {
     return text.replace(/@([a-z\d_]+)/ig, '[@$1](http://twitter.com/$1)');

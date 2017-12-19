@@ -4,4 +4,4 @@ import { Database } from "sqlite3";
 
 module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
 
-}
+};

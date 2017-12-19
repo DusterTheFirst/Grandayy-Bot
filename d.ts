@@ -1,8 +1,8 @@
 interface Config {
     /** Bot token */
-    token: string,
+    token: string;
     /** Guild to stalk */
-    guild: string,
+    guild: string;
     /** Twitter API */
     twitter: {
         consumer_key: string,
@@ -13,28 +13,28 @@ interface Config {
         channel: string,
         /** Users to watch */
         users: number[]
-    }
+    };
     /** Channel for QOTW submissions to be approved in */
-    QOTWsubmissions: string
+    QOTWsubmissions: string;
     /** 
      * Feedback channel
      * @deprecated
      */
-    feedbackchannel: string,
+    feedbackchannel: string;
     /** Channels to send feedback into */
     feedbackchannels: {
         [x: string]: string[]
-    },
+    };
     /** Channel for voting */
-    voteschannel: string
+    voteschannel: string;
     /** Status identifiers */
     statuses: {
         [x: string]: string[]
-    },
+    };
     /** Level identifiers */
     levels: {
         [x: string]: string
-    }
+    };
 }
 
 declare module 'humanize-duration' {

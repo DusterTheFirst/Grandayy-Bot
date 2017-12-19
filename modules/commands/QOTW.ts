@@ -1,25 +1,13 @@
-import { CommandHandler, ParameterType, CommandContext } from "mechan.js"
+import { CommandHandler, ParameterType, CommandContext } from "mechan.js";
 import { Collection, Client, TextChannel, RichEmbed, Message, ReactionCollector, MessageReaction, Guild, RichEmbedOptions, MessageEmbed } from "discord.js";
 import { Database } from "sqlite3";
 import humanize = require("humanize-duration");
 
 module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
-    handler.createCommand('say')
-        .addParameter('thing', ParameterType.Unparsed)
-        .hide()
-        .addCheck((context) => context.user.id === "168827261682843648")
-        .setCallback((context) => {
-            if (context.message.deletable) {
-                context.message.delete();
-            }
-            context.channel.send(context.params.get('thing') as string);
-        })
-
-    //RESTART COLLECTORS
-    let QOTWChannel = client.channels.get(config.QOTWsubmissions) as TextChannel
+    let QOTWChannel = client.channels.get(config.QOTWsubmissions) as TextChannel;
 
     handler.createGroup('qotw', (qotw) => {
-        qotw.setCategory('Question Of The Week')
+        qotw.setCategory('Question Of The Week');
 
         qotw.createCommand('reset')
             .setCategory('Dad Commands')
@@ -43,8 +31,8 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         }
                         client.removeListener('message', listenforresp);
                     }
-                }
-                client.on('message', listenforresp)
+                };
+                client.on('message', listenforresp);
             });
 
         qotw.createCommand('propose')
@@ -93,14 +81,65 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                     return;
                 }
                 let vote: 'a' | 'n' | 'y';
+                switch (context.params.get('vote')) {
+                    case "yes":
+                    case "y":
+                        vote = 'y';
+                        break;
+                    case "no":
+                    case "n":
+                        vote = 'n';
+                        break;
+                    case "abstain":
+                    case "a":
+                        vote = 'a';
+                        break;
+                    default:
+                        context.channel.send(`Invalid vote '**${context.params.get('vote')}**'`);
+                        return;
+                }
                 database.get(`SELECT * FROM qotwpropositions WHERE proposer = ?`, [member.user.id], (error, row: Propisition) => {
                     if (row) {
-                        database.run(`UPDATE qotwlimits SET ? = ? WHERE proposer = ?`, [vote, row[vote], member.user.id]);
-                        context.channel.send(`did your thing`);
+                        let voted: 'a' | 'n' | 'y';
+                        let yess = row.y.split(',');
+                        let nos = row.n.split(',');
+                        let abstains = row.a.split(',');
+
+                        if (yess.includes(context.member.id)) {
+                            yess.splice(yess.indexOf(context.member.id), 1);
+                            voted = 'y';
+                        }
+                        if (nos.includes(context.member.id)) {
+                            nos.splice(yess.indexOf(context.member.id), 1);
+                            voted = 'n';
+                        }
+                        if (abstains.includes(context.member.id)) {
+                            abstains.splice(yess.indexOf(context.member.id), 1);
+                            voted = 'a';
+                        }
+
+                        if (vote === 'y') 
+                            yess.push(member.user.id);
+                        if (vote === 'n')
+                            nos.push(member.user.id);
+                        if (vote === 'a')
+                            abstains.push(member.user.id);
+
+                        database.run(`UPDATE qotwpropositions SET y = ? WHERE proposer = ?`, [yess.join(','), member.user.id]);
+                        database.run(`UPDATE qotwpropositions SET n = ? WHERE proposer = ?`, [nos.join(','), member.user.id]);
+                        database.run(`UPDATE qotwpropositions SET a = ? WHERE proposer = ?`, [abstains.join(','), member.user.id]);
+
+                        if (voted === vote) {
+                            context.channel.send(`You already voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
+                        } else if (voted) {
+                            context.channel.send(`Changed vote from **${getLongVote(voted)}** to **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
+                        } else {
+                            context.channel.send(`Voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
+                        }
                     } else {
-                        context.channel.send(`that boye has no QOTW`);
+                        context.channel.send(`**${member.user.tag}** is not proposing a QOTW`);
                     }
-                    context.channel.send(`No one cares that you voted ${context.params.get('vote')} for ${member.user.tag}`);
+                    //context.channel.send(`No one cares that you voted ${context.params.get('vote')} for ${member.user.tag}`);
                 });
                 //SEND TO STAFF CHANNEL x<y/4 with y>4 TO win
             });
@@ -112,14 +151,14 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         qotw.createNestedCommand('list queue')
                 .setDescription('List the QOTW queue')
                 .setCallback(listQueue);
-    })
+    });
 
     function propose(context: CommandContext) {
         let question: string = context.params.get('question');
         
         let channel = client.channels.get(config.QOTWsubmissions) as TextChannel;
 
-        database.run("CREATE TABLE IF NOT EXISTS qotwpropositions (proposer TEXT, proposed INTEGER, proposedMSG TEXT, question TEXT, y BLOB, n BLOB, a BLOB);", () => {    
+        database.run("CREATE TABLE IF NOT EXISTS qotwpropositions (proposer TEXT, proposed INTEGER, proposedMSG TEXT, question TEXT, y TEXT, n TEXT, a TEXT);", () => {    
             channel.send(new RichEmbed()
                     // .setColor("#43b581") YES
                     // .setColor("#f04747") NO
@@ -138,15 +177,12 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                             message = m;
                         }
 
-                        console.log(message, m)
-
                         database.get(`SELECT * FROM qotwpropositions WHERE proposer = ?`, [context.user.id], (error, row: Propisition) => {
-                            console.log(message, m)
                             if (row) {
                                 remove(row);
                                 database.run('DELETE FROM qotwpropositions WHERE proposer = ?', [context.user.id]);
                             }
-                            database.run(`INSERT INTO qotwpropositions VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [context.user.id, Date.now(), message.id, question, [], [], []]);
+                            database.run(`INSERT INTO qotwpropositions VALUES (?, ?, ?, ?, ?, ?, ?)`, [context.user.id, Date.now(), message.id, question, "", "", ""]);
                         });
                         //database.all("SELECT * FROM qotwpropositions", console.log);
                     });
@@ -187,10 +223,10 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
     function remove(proposition: Propisition) {
         QOTWChannel.fetchMessage(proposition.proposedMSG).then((message) => {
             let oldEmbed = cleanEmbed(message.embeds[0]);
-            message.edit('', { embed: oldEmbed.setColor("#43b581").setFooter('CLOSED') });
+            message.edit('', { embed: oldEmbed.setColor("#f04747").setFooter('CLOSED') });
             message.guild.member(proposition.proposer)
                 .send('', new RichEmbed()
-                        .setColor("#43b581")
+                        .setColor("#f04747")
                         .setTitle(`QOTW "${proposition.question}" was not accepted`)
                         .setDescription(`Your QOTW was not accepted, due to it not getting enough votes`)
                         .setTimestamp());
@@ -201,10 +237,10 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         database.run('CREATE TABLE IF NOT EXISTS qotwqueue (proposer TEXT, proposed INTEGER, question TEXT)', (error) => {
             QOTWChannel.fetchMessage(proposition.proposedMSG).then((message) => {
                 let oldEmbed = cleanEmbed(message.embeds[0]);
-                message.edit('', { embed: oldEmbed.setColor("#f04747").setFooter('PASSED') });
+                message.edit('', { embed: oldEmbed.setColor("#43b581").setFooter('PASSED') });
                 message.guild.member(proposition.proposer)
                     .send('', new RichEmbed()
-                            .setColor("#f04747")
+                            .setColor("#43b581")
                             .setTitle(`QOTW "${proposition.question}" not accepted`)
                             .setDescription(`Your QOTW was not accepted, it won with ${proposition.y} up d00ts`)
                             .setTimestamp());
@@ -212,7 +248,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             }).catch(console.error);
         });
     }
-}
+};
 
 interface Propisition {
     /** ID of the proposer */
@@ -224,11 +260,11 @@ interface Propisition {
     /** Question proposed */
     question: string;
     /** Votes for yes */
-    y: string[];
+    y: string;
     /** Votes for no */
-    n: string[];
+    n: string;
     /** Votes for abstain */
-    a: string[];
+    a: string;
 }
 
 interface QOTW {
@@ -245,6 +281,18 @@ interface PropisitionLimit {
     user: string;
     /** When it was proposed */
     lastproposition: number;
+}
+
+/** Get the long form of a vote char */
+function getLongVote(vote: 'y' | 'n' | 'a'): string {
+    switch (vote) {
+        case 'y':
+            return 'YES';
+        case 'n':
+            return 'NO';
+        case 'a':
+            return 'ABSTAIN';
+    }
 }
 
 /**
@@ -265,7 +313,7 @@ function cleanEmbed(embed: MessageEmbed): RichEmbed {
                 name: x.name, 
                 value: x.value, 
                 inline: x.inline
-            }
+            };
         }),
         file: null, // No property?
         footer: embed.footer && {
@@ -298,7 +346,7 @@ function cleanEmbed(embed: MessageEmbed): RichEmbed {
  * Checks if the member is a moderator
  */
 function isMod(context: CommandContext) {
-    return context.message.member.hasPermission('KICK_MEMBERS');
+    return context.member.hasPermission('KICK_MEMBERS');
 }
 
 

@@ -16,4 +16,4 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         .setCallback((context) => {
             context.channel.send(`The current UTC time is **${new Date(Date.now()).toUTCString().replace(' GMT', '')}**`);
         });
-}
+};

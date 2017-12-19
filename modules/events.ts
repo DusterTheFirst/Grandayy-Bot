@@ -34,4 +34,4 @@ module.exports = (handler: CommandHandler, client: Client, config: Config, datab
         //  START WEBSERVER
         require(__dirname + '/web')(client, config, client.channels.find('id', config.feedbackchannel), database);
     });
-}
+};
