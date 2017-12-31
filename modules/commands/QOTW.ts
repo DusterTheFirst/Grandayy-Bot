@@ -73,7 +73,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             .addParameter('user', ParameterType.Required)
             .addParameter('vote', ParameterType.Required)
             .setDescription('Set your vote on the QOTW (yes|no)')
-            .addCheck(isMod)
+            .addCheck(isModServer)
             .setCallback((context) => {
                 let member = getGuildMember(context.params.get('user'), context.guild);
                 if (!member) {
@@ -137,12 +137,16 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         } else {
                             context.channel.send(`Voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
                         }
+                        
+                        //SEND TO STAFF CHANNEL x*4<y with y>4 TO win
+                        if (nos.length * 4 < yess.length && yess.length > 4) {
+                            context.channel.send(`A THING HAPPENED`);
+                        }
                     } else {
                         context.channel.send(`**${member.user.tag}** is not proposing a QOTW`);
                     }
                     //context.channel.send(`No one cares that you voted ${context.params.get('vote')} for ${member.user.tag}`);
                     
-                    //SEND TO STAFF CHANNEL x<y/4 with y>4 TO win
                 });
             });
 
@@ -378,10 +382,10 @@ function cleanEmbed(embed: MessageEmbed): RichEmbed {
 }
 
 /**
- * Checks if the member is a moderator
+ * Checks if the member is in the mod server
  */
-function isMod(context: CommandContext) {
-    return context.member.hasPermission('KICK_MEMBERS');
+function isModServer(context: CommandContext) {
+    return context.guild.id === "372420841943859210";
 }
 
 

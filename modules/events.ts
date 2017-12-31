@@ -1,5 +1,5 @@
 import { Collection, Client } from "discord.js";
-import { CommandHandler, CommandErrorType } from "mechan.js";
+import { CommandHandler, CommandErrorType, ParameterType } from "mechan.js";
 import { Database } from "sqlite3";
 import { default as chalk } from 'chalk';
 
@@ -9,12 +9,19 @@ module.exports = (handler: CommandHandler, client: Client, config: Config, datab
             case CommandErrorType.BadPermissions:
             case CommandErrorType.UnknownCommand:
                 break;
+            case CommandErrorType.BadArgCount:
+            case CommandErrorType.InvalidInput:
+                let reqparams = context.command.parameters.filter(x => x && x.type === ParameterType.Required);
+                let reqlength = reqparams && reqparams.length || 0;
+                let totallength = context.command.parameters.length;
+                context.channel.send(`**Invalid arguments:** \`${context.handler.config.prefix}${context.command.fullname}\` requires ${totallength === reqlength ? totallength : `${reqlength} - ${totallength}`} parameters`);
+                break;
             default:
                 console.log(context.command && context.command.fullname, context.errorType, context.error);
         }
     });
 
-    client.on("error", (msg) => { console.error(chalk.red(`[Error] ${msg}`)); });
+    client.on("error", (msg) => { console.error(chalk.red(`[Error] ${msg.stack}`)); });
     client.on("warn", (msg) => { console.warn(chalk.yellow(`[Warn] ${msg}`)); });
     client.on("debug", (msg) => {
         if (msg.startsWith("[ws]"))
