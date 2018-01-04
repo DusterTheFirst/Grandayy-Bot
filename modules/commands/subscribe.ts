@@ -11,7 +11,7 @@ interface Subscription {
 const subscriptions: Subscription[] = require("./res/subscriptions.json");
 
 module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
-    handler.createNestedCommand("subscriptions list all")
+    handler.createNestedCommand("subscriptions all")
         .setDescription("List all possible subscriptions")
         .setCategory("Subscription Commands")
         .setCallback((context) => {
@@ -25,7 +25,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             context.channel.send(embed);
         });
 
-    handler.createNestedCommand("subscriptions list mine")
+    handler.createNestedCommand("subscriptions mine")
         .setDescription("List all subscriptions you have")
         .setCategory("Subscription Commands")
         .setCallback((context) => {
@@ -59,22 +59,26 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         .setCategory("Subscription Commands")
         .setCallback((context) => {
             let keyword: string = context.params.get("keyword").toLowerCase();
-            let roleName = subscriptions.find(x => x.name === keyword);
+            let sub = subscriptions.find(x => x.name === keyword);
 
-            if (!roleName) {
+            if (!sub) {
                 context.channel.send(`Keyword "**${keyword}**" does not exist`);
+                return;
             }
-            // try {
-            //     var role = context.guild.roles.find(x => x.name === "Event Participant");
-            //     if (context.message.member.roles.some(x => x.name === "Event Participant")) {
-            //         context.message.reply("You already are subscribed");
-            //     } else {
-            //         context.message.member.addRole(role);
-            //         context.message.reply("You have been subscribed to `Events`!");
-            //     }
-            // } catch (e) {
-            //     context.channel.send("***INTERNAL ERROR, PLEASE TRY AGAIN***");
-            // }
+
+            var role = context.guild.roles.find(x => x.name === sub.role);
+
+            if (!role) {
+                context.channel.send(`I cannot find the role for **${keyword}**`);
+                return;
+            }
+
+            if (context.message.member.roles.has(role.id)) {
+                context.message.reply(`You already are subscribed to ${keyword}`);
+            } else {
+                context.message.member.addRole(role).catch(e => console.error(e));
+                context.message.reply(`You have been subscribed to **${keyword}**!`);
+            }
         });
 
     handler.createNestedCommand("unsubscribe from")
@@ -82,16 +86,26 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         .setDescription("Unsubscribe from some channels")
         .setCategory("Subscription Commands")
         .setCallback((context) => {
-            // try {
-            //     var role = context.guild.roles.find(x => x.name === "Event Participant");
-            //     if (context.message.member.roles.some(x => x.name === "Event Participant")) {
-            //         context.message.member.removeRole(role);
-            //         context.message.reply("You have been unsubscribed from `Events`!");
-            //     } else {
-            //         context.message.reply("You already are unsubscribed");
-            //     }
-            // } catch (e) {
-            //     context.channel.send("***INTERNAL ERROR, PLEASE TRY AGAIN***");
-            // }
+            let keyword: string = context.params.get("keyword").toLowerCase();
+            let sub = subscriptions.find(x => x.name === keyword);
+
+            if (!sub) {
+                context.channel.send(`Keyword "**${keyword}**" does not exist`);
+                return;
+            }
+
+            var role = context.guild.roles.find(x => x.name === sub.role);
+            if (!role) {
+                context.channel.send(`I cannot find the role for  **${keyword}**`);
+                return;
+            }
+
+            if (context.message.member.roles.has(role.id)) {
+                context.message.member.removeRole(role).catch(e => console.error(e));
+                context.message.reply(`You have been unsubscribed from **${keyword}**!`);
+            } else {
+                context.message.reply(`You already are unubscribed from ${keyword}`);
+
+            }
         });
 };

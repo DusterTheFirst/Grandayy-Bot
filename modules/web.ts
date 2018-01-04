@@ -14,6 +14,7 @@ const chalk: any = require("chalk");
 const getRoutes: any = require("get-routes");
 
 var configuration: Config;
+// let CDN: { [x: string]: string } = require("./CDN.json");
 
 module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, database: Database) => {
     configuration = config;
@@ -39,6 +40,18 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         res.send(error(`This is the endpoint for accessing and sending data to and from @Robbie Botten#3585`,
                        `You may be looking for ${url("https://discord.grande1899.com/")} or ${url("/endpoints")}`));
     });
+
+    // app.get("/cdn/:filename", (req, res) => {
+    //     let reqFile: string = req.params.filename;
+
+    //     let filename = CDN[reqFile];
+
+    //     if (!filename) {
+    //         res.send(`${reqFile} does not exist on this CDN`);
+    //     }
+
+        
+    // });
 
     app.get("/endpoints", (req, res) => {
         var contype = req.headers["content-type"];

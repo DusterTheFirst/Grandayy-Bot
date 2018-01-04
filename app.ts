@@ -20,7 +20,7 @@ var client = new Discord.Client({
     fetchAllMembers: true
 });
 
-var database = new SQLite.Database("./SQL/RobbieBotten.mdf");
+var database = new SQLite.Database("./SQL/RobbieBotten.sqlite");
 database.on("trace", (sql) => console.log(chalk.yellow(sql)));
 
 database.serialize(() => {

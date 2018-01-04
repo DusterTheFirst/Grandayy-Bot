@@ -50,7 +50,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 context.channel.send(new RichEmbed()
                                         .setColor("#f04747")
                                         .setTitle(`:x: ${context.params.get("member")} Does not exist in this server`)
-                                        .setDescription(`Use \`rb.forcewarn <id> [reason...]\` to force a warn using the user"s ID (Use for users who left the server)`));
+                                        .setDescription(`Use \`rb.forcewarn <id> [reason...]\` to force a warn using the user's ID (Use for users who left the server)`));
                 return;
             }
 
@@ -272,7 +272,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 context.channel.send(new RichEmbed()
                                         .setColor("#f04747")
                                         .setTitle(`:x: ${context.params.get("member")} Does not exist in this server`)
-                                        .setDescription(`Use \`rb.forcedelwarn <id> <index>\` to force delete a warn using the user"s ID`));
+                                        .setDescription(`Use \`rb.forcedelwarn <id> <index>\` to force delete a warn using the user's ID`));
                 return;
             }
 

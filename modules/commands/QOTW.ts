@@ -7,7 +7,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
     let QOTWChannel = client.channels.get(config.QOTWsubmissions) as TextChannel;
 
     handler.createGroup("qotw", (qotw) => {
-        qotw.setCategory("Question Of The Week");
+        qotw.setCategory("Question Of The Day");
 
         qotw.createCommand("reset")
             .setCategory("Dad Commands")
@@ -27,7 +27,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                                 });
                             });
                         } else {
-                            context.channel.send("i wont then");
+                            context.channel.send("i won't then");
                         }
                         client.removeListener("message", listenforresp);
                     }
@@ -72,8 +72,8 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         qotw.createCommand("vote")
             .addParameter("user", ParameterType.Required)
             .addParameter("vote", ParameterType.Required)
-            .setDescription("Set your vote on the QOTW (yes|no)")
-            .addCheck(isModServer)
+            .setDescription("Set your vote on a QOTW (yes|no|abstain)")
+            .addCheck(isStaff)
             .setCallback((context) => {
                 let member = getGuildMember(context.params.get("user"), context.guild);
                 if (!member) {
@@ -131,16 +131,19 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         });
 
                         if (voted === vote) {
-                            context.channel.send(`You already voted **${getLongVote(vote)}** on **${member.user.tag}**"s proposal`);
+                            context.channel.send(`You already voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
                         } else if (voted) {
-                            context.channel.send(`Changed vote from **${getLongVote(voted)}** to **${getLongVote(vote)}** on **${member.user.tag}**"s proposal`);
+                            context.channel.send(`Changed vote from **${getLongVote(voted)}** to **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
                         } else {
-                            context.channel.send(`Voted **${getLongVote(vote)}** on **${member.user.tag}**"s proposal`);
+                            context.channel.send(`Voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
                         }
                         
                         //SEND TO STAFF CHANNEL x*4<y with y>4 TO win
-                        if (nos.length * 4 < yess.length && yess.length > 4) {
+                        if (nos.length + 4 <= yess.length && yess.length > 4) {
                             context.channel.send(`A THING HAPPENED`);
+                            database.get(`SELECT * FROM qotwpropositions WHERE proposer = ?`, [member.user.id], (error, row: Propisition) => {
+                                pass(row);
+                            });
                         }
                     } else {
                         context.channel.send(`**${member.user.tag}** is not proposing a QOTW`);
@@ -161,16 +164,14 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
 
     function propose(context: CommandContext) {
         let question: string = context.params.get("question");
-        
-        let channel = client.channels.get(config.QOTWsubmissions) as TextChannel;
 
         database.run("CREATE TABLE IF NOT EXISTS qotwpropositions (proposer TEXT, proposed INTEGER, proposedMSG TEXT, question TEXT, y TEXT, n TEXT, a TEXT);", () => {    
-            channel.send(new RichEmbed()
+            QOTWChannel.send(new RichEmbed()
                     // .setColor("#43b581") YES
                     // .setColor("#f04747") NO
                     .setColor("#faa61a")
                     .setTitle(`QOTW proposed by ${context.user.tag}`)
-                    .setDescription(`**Question:** ${question}\n\n**Command: **-qotw vote ${context.user.tag} [yes|no]`)
+                    .setDescription(`**Question:** ${question}\n\n**Command: **-qotw vote ${context.user.tag}`)
                     .setFooter("Awaiting votes...")
                     .addField("Yes", 0, true)
                     .addField("No", 0, true)
@@ -193,7 +194,6 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                             }
                             database.run(`INSERT INTO qotwpropositions VALUES (?, ?, ?, ?, ?, ?, ?)`, [context.user.id, Date.now(), message.id, question, "", "", ""]);
                         });
-                        //database.all("SELECT * FROM qotwpropositions", console.log);
                     });
         });
     }
@@ -250,10 +250,11 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 message.guild.member(proposition.proposer)
                     .send("", new RichEmbed()
                             .setColor("#43b581")
-                            .setTitle(`QOTW "${proposition.question}" not accepted`)
-                            .setDescription(`Your QOTW was not accepted, it won with ${proposition.y} up d00ts`)
+                            .setTitle(`QOTW "${proposition.question}" was accepted`)
+                            .setDescription(`Your QOTW was accepted, it won with ${getArrayfromString(proposition.y).length} upd00ts`)
                             .setTimestamp());
                 database.run("INSERT INTO qotwqueue VALUES (?, ?, ?)", [proposition.proposer, proposition.proposed, proposition.question]);
+                database.run("DELETE FROM qotwpropositions WHERE proposer = ?", [proposition.proposer]);
             }).catch(console.error);
         });
     }
@@ -384,8 +385,14 @@ function cleanEmbed(embed: MessageEmbed): RichEmbed {
 /**
  * Checks if the member is in the mod server
  */
-function isModServer(context: CommandContext) {
-    return context.guild.id === "372420841943859210";
+function isStaff(context: CommandContext) {
+    let is = context.guild.id === "372420841943859210" && (context.member.roles.array().filter(x => x.name !== "@everyone").length > 0);
+
+    if (!is) {
+        context.channel.send(new RichEmbed().setColor("#f04747").attachFile("./modules/commands/res/hahaYES.png").setImage("attachment://hahaYES.png"));
+    }
+
+    return is;
 }
 
 

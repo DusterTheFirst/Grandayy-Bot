@@ -16,6 +16,8 @@ interface Config {
     };
     /** Channel for QOTW submissions to be approved in */
     QOTWsubmissions: string;
+    /** Channel for passed QOTW submissions to be posted */
+    QOTW: string;
     /** 
      * Feedback channel
      * @deprecated
@@ -37,7 +39,7 @@ interface Config {
     };
 }
 
-declare module 'humanize-duration' {
+declare module "humanize-duration" {
     function humanize(miliseconds: number, options?: {
         /** Language for unit display (accepts an ISO 639-1 code from one of the supported languages). */
         language?: string,
