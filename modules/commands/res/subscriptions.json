@@ -1,0 +1,12 @@
+[
+    {     
+        "name": "events",    
+        "description": "Participate in events in the server",
+        "role": "Event Participant"
+    },
+    {
+        "name": "nsfw",
+        "description": "Enter the darkness",
+        "role": "Lewd"
+    }
+]

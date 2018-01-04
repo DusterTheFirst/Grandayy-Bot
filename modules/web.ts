@@ -3,25 +3,25 @@ import * as Mechan from "mechan.js";
 import * as express from "express";
 const app = express();
 import * as https from "https";
-import * as helmet from 'helmet';
-import * as fs from 'fs';
-import * as bodyParser from 'body-parser';
+import * as helmet from "helmet";
+import * as fs from "fs";
+import * as bodyParser from "body-parser";
 import { NextFunction, Response } from "express";
 import { Request } from "express-serve-static-core";
 import { Database } from "sqlite3";
 
-const chalk: any = require('chalk');
-const getRoutes: any = require('get-routes');
+const chalk: any = require("chalk");
+const getRoutes: any = require("get-routes");
 
 var configuration: Config;
 
 module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, database: Database) => {
     configuration = config;
 
-    const guild = client.guilds.find('id', config.guild);
+    const guild = client.guilds.find("id", config.guild);
     
-    var privateKey = fs.readFileSync('key.crt');
-    var certificate = fs.readFileSync('certificate.crt');
+    var privateKey = fs.readFileSync("key.crt");
+    var certificate = fs.readFileSync("certificate.crt");
     
     app.use(helmet());
     app.use(bodyParser.json());
@@ -35,22 +35,22 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         next();
     });
     
-    app.get('/', (req, res) => {
+    app.get("/", (req, res) => {
         res.send(error(`This is the endpoint for accessing and sending data to and from @Robbie Botten#3585`,
-                       `You may be looking for ${url('https://discord.grande1899.com/')} or ${url('/endpoints')}`));
+                       `You may be looking for ${url("https://discord.grande1899.com/")} or ${url("/endpoints")}`));
     });
 
-    app.get('/endpoints', (req, res) => {
-        var contype = req.headers['content-type'];
+    app.get("/endpoints", (req, res) => {
+        var contype = req.headers["content-type"];
 
-        if (contype === 'application/json') {
-            res.contentType('application/json').send(getRoutes(app));
+        if (contype === "application/json") {
+            res.contentType("application/json").send(getRoutes(app));
         } else {
             let html = "<h1>Endpoints</h1>";
             
             let routes = getRoutes(app);
             for (let method in routes) {
-                if (method === 'acl')
+                if (method === "acl")
                    continue;
                 html += `<h2 style="margin-bottom: -5px;">${method.toUpperCase()}</h2><hr>`;
                 for (let endpoint of routes[method]) {
@@ -63,16 +63,16 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         }
     });
     
-    app.get('/guild', (req, res) => {
-        res.contentType('application/json').send(trimGuild(guild));
+    app.get("/guild", (req, res) => {
+        res.contentType("application/json").send(trimGuild(guild));
     });
     
-    // app.get('/users', (req, res) => {
+    // app.get("/users", (req, res) => {
     //     guild.fetchMembers();
-    //     res.contentType('json').send(guild.members.map(x => x.user.id));
+    //     res.contentType("json").send(guild.members.map(x => x.user.id));
     // });
 
-    app.get('/users', (req, res) => {
+    app.get("/users", (req, res) => {
         guild.fetchMembers();
 
         let members = guild.members;
@@ -112,7 +112,7 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
             members = members.filter(x => x.nickname.toLowerCase().includes(req.query.nickname.toLowerCase()));
         }
         if (req.query.bot !== undefined) {
-            members = members.filter(x => (req.query.bot.toLowerCase() == 'true') === x.user.bot);
+            members = members.filter(x => (req.query.bot.toLowerCase() === "true") === x.user.bot);
         }
         if (req.query.level) {
             members = members.filter(x => parseInt(trimMember(x).level) === parseInt(req.query.level));
@@ -130,42 +130,42 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         else
             res.send(members.map(trimMember));
     });
-    app.get('/user/:userid', (req, res) => {
+    app.get("/user/:userid", (req, res) => {
         guild.fetchMembers();
         let member = guild.members.find(x => x.id === req.params.userid);
-        res.contentType('application/json').send(trimMember(member));
+        res.contentType("application/json").send(trimMember(member));
     });
 
-    app.get('/bans', (req, res) => {
+    app.get("/bans", (req, res) => {
         // guild.fetchAuditLogs({type: [22, 23]}).then(audits => {
-        //     res.contentType('application/json').send(audits);
+        //     res.contentType("application/json").send(audits);
         //     console.log(audits);
         // });
-        res.send('WHERE WE STOOR');
+        res.send("WHERE WE STOOR");
     });
 
-    app.get('/warns', (req, res) => {
-        database.get('SELECT * FROM warns', (error, row) => {
-            res.contentType('application/json').send(row);
+    app.get("/warns", (req, res) => {
+        database.get("SELECT * FROM warns", (error, row) => {
+            res.contentType("application/json").send(row);
         });
     });
     
-    app.get('/roles', (req, res) => {
+    app.get("/roles", (req, res) => {
         guild.fetchMembers();
-        res.contentType('application/json').send(guild.roles.map(trimRole));
+        res.contentType("application/json").send(guild.roles.map(trimRole));
     });
-    app.get('/role/:roleid', (req, res) => {
+    app.get("/role/:roleid", (req, res) => {
         guild.fetchMembers();
         let role = guild.roles.find(x => x.id === req.params.roleid);
-        res.contentType('application/json').send(trimRole(role));
+        res.contentType("application/json").send(trimRole(role));
     });
 
-    app.get('/statuses', (req, res) => {
+    app.get("/statuses", (req, res) => {
         guild.fetchMembers();
-        res.contentType('application/json').send(Object.keys(config.statuses));
+        res.contentType("application/json").send(Object.keys(config.statuses));
     });
 
-    app.get('/info', (req, res) => {
+    app.get("/info", (req, res) => {
         res.send({
             member: trimMember(guild.me),
             guild: trimGuild(guild),
@@ -173,9 +173,9 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         });
     });
 
-    app.get('/me', (req, res) => {
+    app.get("/me", (req, res) => {
         if (!req.query.token_type || !req.query.access_token) {
-            res.contentType('application/json').send({error: "missing GET parameters", parameters: ["token_type", "access_token"]});
+            res.contentType("application/json").send({error: "missing GET parameters", parameters: ["token_type", "access_token"]});
             return;
         }
 
@@ -187,10 +187,10 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
             }
         }, (response) => {
             let data = "";
-            response.on('data', (chunk) => {
+            response.on("data", (chunk) => {
                 data += chunk;
             });
-            response.on('end', () => {
+            response.on("end", () => {
                 let parseddata = JSON.parse(data);
                 
                 if (parseddata.code === 0) {
@@ -199,15 +199,15 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
                 }
 
                 let member = guild.members.find(x => x.id === parseddata.id);
-                res.contentType('application/json').send(trimMember(member));
+                res.contentType("application/json").send(trimMember(member));
             });
         }).end();
     });
 
-    app.post('/feedback', (req, res) => {
+    app.post("/feedback", (req, res) => {
         if (!req.body.token || !req.body.type || !req.body.title || !req.body.content) {
             res.status(400);
-            res.end(`YOU ARE MISSING THE FOLLOWING 'POST' PARAMETERS:\n` +
+            res.end(`YOU ARE MISSING THE FOLLOWING "POST" PARAMETERS:\n` +
                     (req.body.token   ? "" : " - token\n") +
                     (req.body.type    ? "" : " - type\n")  +
                     (req.body.title   ? "" : " - title\n") +
@@ -218,8 +218,8 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         guild.fetchMembers();
 
         https.get({
-            hostname: 'discordapp.com',
-            path: '/api/v6/users/@me',
+            hostname: "discordapp.com",
+            path: "/api/v6/users/@me",
             headers: {
                 Authorization: req.body.token + " " + req.body.type
             }
@@ -227,21 +227,21 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
             let body = "";
 
             if (response.statusCode === 401) {
-                res.status(401).end('Invalid credentials');
+                res.status(401).end("Invalid credentials");
                 return;
             }
 
-            response.on('data', (chunk) => {
+            response.on("data", (chunk) => {
                 body += chunk;
             });
-            response.on('end', () => {
+            response.on("end", () => {
                 let parsedbody = JSON.parse(body);
                 console.log(parsedbody);
 
-                let member = client.guilds.find('id', '306061550693777409').members.find((member) => member.user.tag.toLowerCase() === parsedbody.tag.toLowerCase());
+                let member = client.guilds.find("id", "306061550693777409").members.find((member) => member.user.tag.toLowerCase() === parsedbody.tag.toLowerCase());
                 
                 if (!member) {
-                    res.status(401).end('You must be in the server to submit feedback');
+                    res.status(401).end("You must be in the server to submit feedback");
                     return;
                 }
         
@@ -257,29 +257,29 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
                     .setColor(13380104)
                     .setTimestamp()
                     .setThumbnail(member.user.avatarURL)
-                    .addField('Author', `${member.user.tag}`)
-                    .addField('IP', req.connection.remoteAddress.replace('::ffff:', "")));
+                    .addField("Author", `${member.user.tag}`)
+                    .addField("IP", req.connection.remoteAddress.replace("::ffff:", "")));
         
-                member.send("The admins of " + client.guilds.find('id', '306061550693777409').name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
+                member.send("The admins of " + client.guilds.find("id", "306061550693777409").name + " have recieved your feedback\nBelow is an example of what they received\n\nIF YOU DID NOT SEND THIS MESSAGE, PLEASE CONTACT THE ADMINS", 
                     new RichEmbed()
                     .setTitle("TITLE: " + req.body.title)
                     .setDescription(req.body.content)
                     .setColor(13380104)
                     .setTimestamp()
                     .setThumbnail(member.user.avatarURL)
-                    .addField('Author', `${member.user.tag}`));
+                    .addField("Author", `${member.user.tag}`));
             });
         });
     });
     
-    app.all('*', (req, res) => {
-        res.status(404).contentType('html').send(error(`404, endpoint does not exist or invalid method used`,
-                                    `see ${url('/endpoints')} for all endpoints`));
+    app.all("*", (req, res) => {
+        res.status(404).contentType("html").send(error(`404, endpoint does not exist or invalid method used`,
+                                    `see ${url("/endpoints")} for all endpoints`));
     });
 
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         console.error(chalk.red(err.stack));
-        res.status(500).contentType('html').send(error("500, Internal error", `${err.name}: ${err.message}`));
+        res.status(500).contentType("html").send(error("500, Internal error", `${err.name}: ${err.message}`));
     });
     
     let server = https.createServer({

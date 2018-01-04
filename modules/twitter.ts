@@ -1,13 +1,13 @@
 import { RichEmbed, TextChannel } from "discord.js";
-const Twitter = require('twitter');
+const Twitter = require("twitter");
 
 module.exports = (config: Config, channel: TextChannel) => {
     var twitter = new Twitter(config.twitter);
 
     let twitteraccounts = config.twitter.users;
     
-    twitter.stream('statuses/filter', { follow: twitteraccounts.toString() }, (stream: any) => {
-        stream.on('data', (tweet: any) => {
+    twitter.stream("statuses/filter", { follow: twitteraccounts.toString() }, (stream: any) => {
+        stream.on("data", (tweet: any) => {
             if (twitteraccounts.includes(tweet.user.id) && !tweet.in_reply_to_screen_name) { // Only tweets from the user id
                 let image_url = "";
                 if (tweet.entities.media !== undefined)
@@ -27,15 +27,15 @@ module.exports = (config: Config, channel: TextChannel) => {
             }
         });
     
-        stream.on('error', (error: any) => {
+        stream.on("error", (error: any) => {
             console.log(error);
         });
     });
 };
 
 function replaceMentionsWithLinks(text: string) {
-    return text.replace(/@([a-z\d_]+)/ig, '[@$1](http://twitter.com/$1)');
+    return text.replace(/@([a-z\d_]+)/ig, "[@$1](http://twitter.com/$1)");
 }
 function replaceHashtagsWithLinks(text: string) {
-    return text.replace(/#([a-z\d_]+)/ig, '[#$1](https://twitter.com/hashtag/$1)');
+    return text.replace(/#([a-z\d_]+)/ig, "[#$1](https://twitter.com/hashtag/$1)");
 }

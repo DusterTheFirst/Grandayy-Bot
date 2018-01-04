@@ -1,16 +1,16 @@
 import { CommandHandler, ParameterType } from "mechan.js";
 import { Collection, Client } from "discord.js";
-import * as Jimp from 'jimp';
+import * as Jimp from "jimp";
 import { Database } from "sqlite3";
 
 module.exports = (handler: CommandHandler, databaseL: Database, client: Client, config: Config) => {
-    handler.createCommand('grandayy')
-        .addParameter('image url', ParameterType.Optional)
-        .setDescription('Grandayyify the image from the url or the attached image')
-        .setCategory('Fun Commands')
+    handler.createCommand("grandayy")
+        .addParameter("image url", ParameterType.Optional)
+        .setDescription("Grandayyify the image from the url or the attached image")
+        .setCategory("Fun Commands")
         .setCallback((context) => {
             context.channel.startTyping();
-            let image = context.message.attachments.first() || { url: context.params.get('image url')};
+            let image = context.message.attachments.first() || { url: context.params.get("image url")};
             
             if (image.url === undefined) {
                 context.message.channel.send("**Please attach an image, or give a url to an image**");

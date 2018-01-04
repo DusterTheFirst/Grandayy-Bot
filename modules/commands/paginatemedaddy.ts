@@ -45,7 +45,7 @@ class Paginator {
                             this.message.react(this.last)))));
 
             this.collector = this.message.createReactionCollector((reaction, user) => reaction.me && user.id === dad.id && user.id !== this.message.author.id, {time: 100000});
-            this.collector.on('collect', (reaction, collector) => {
+            this.collector.on("collect", (reaction, collector) => {
                 reaction.remove(dad);
 
                 switch (reaction.emoji.toString()) {

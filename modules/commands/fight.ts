@@ -5,14 +5,14 @@ import { Database } from "sqlite3";
 module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     const FightResp = require(__dirname + "/res/fightresp.json");
 
-    handler.createCommand('fight')
-        .addParameter('player one', ParameterType.Required)
-        .addParameter('player two', ParameterType.Optional)
-        .setDescription('Make the given person(s) fight to the death')
-        .setCategory('Fun Commands')
+    handler.createCommand("fight")
+        .addParameter("player one", ParameterType.Required)
+        .addParameter("player two", ParameterType.Optional)
+        .setDescription("Make the given person(s) fight to the death")
+        .setCategory("Fun Commands")
         .setCallback((context) => {
-            let player1 = context.params.get('player one');
-            let player2 = context.params.get('player two') || context.message.author.username;
+            let player1 = context.params.get("player one");
+            let player2 = context.params.get("player two") || context.message.author.username;
         
             let out;
         

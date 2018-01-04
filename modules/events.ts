@@ -1,10 +1,10 @@
 import { Collection, Client } from "discord.js";
 import { CommandHandler, CommandErrorType, ParameterType } from "mechan.js";
 import { Database } from "sqlite3";
-import { default as chalk } from 'chalk';
+import { default as chalk } from "chalk";
 
 module.exports = (handler: CommandHandler, client: Client, config: Config, database: Database) => {
-    handler.on('failure', (handler, context) => {
+    handler.on("failure", (handler, context) => {
         switch (context.errorType) {
             case CommandErrorType.BadPermissions:
             case CommandErrorType.UnknownCommand:
@@ -33,12 +33,12 @@ module.exports = (handler: CommandHandler, client: Client, config: Config, datab
         client.user.setGame("discord.grande1899.com", "https://www.twitch.tv/dusterthefirst");
     
         //  LOAD COMMANDS
-        require(__dirname + '/commandloader')(handler, database, client, config);
+        require(__dirname + "/commandloader")(handler, database, client, config);
 
         //  LOAD TWITTER MODULE
-        require(__dirname + '/twitter')(config, client.channels.find('id', config.twitter.channel));
+        require(__dirname + "/twitter")(config, client.channels.find("id", config.twitter.channel));
 
         //  START WEBSERVER
-        require(__dirname + '/web')(client, config, client.channels.find('id', config.feedbackchannel), database);
+        require(__dirname + "/web")(client, config, client.channels.find("id", config.feedbackchannel), database);
     });
 };
