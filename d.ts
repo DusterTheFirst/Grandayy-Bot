@@ -18,7 +18,7 @@ interface Config {
     QOTWsubmissions: string;
     /** Channel for passed QOTW submissions to be posted */
     QOTW: string;
-    /** 
+    /**
      * Feedback channel
      * @deprecated
      */

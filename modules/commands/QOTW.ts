@@ -6,6 +6,7 @@ import humanize = require("humanize-duration");
 module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     let QOTWChannel = client.channels.get(config.QOTWsubmissions) as TextChannel;
 
+
     handler.createGroup("qotw", (qotw) => {
         qotw.setCategory("Question Of The Day");
 
@@ -65,8 +66,6 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         }
                     });
                 });
-
-                
             });
 
         qotw.createCommand("vote")
@@ -112,12 +111,12 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         } else if (abstains.includes(context.member.id)) {
                             voted = "a";
                         }
-                        
+
                         removeFromArray(context.member.id, yess);
                         removeFromArray(context.member.id, nos);
                         removeFromArray(context.member.id, abstains);
 
-                        if (vote === "y") 
+                        if (vote === "y")
                             yess.push(context.member.id);
                         if (vote === "n")
                             nos.push(context.member.id);
@@ -137,8 +136,8 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         } else {
                             context.channel.send(`Voted **${getLongVote(vote)}** on **${member.user.tag}**'s proposal`);
                         }
-                        
-                        //SEND TO STAFF CHANNEL x*4<y with y>4 TO win
+
+                        // SEND TO STAFF CHANNEL x*4<y with y>4 TO win
                         if (nos.length + 4 <= yess.length && yess.length > 4) {
                             context.channel.send(`A THING HAPPENED`);
                             database.get(`SELECT * FROM qotwpropositions WHERE proposer = ?`, [member.user.id], (error, row: Propisition) => {
@@ -148,8 +147,6 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                     } else {
                         context.channel.send(`**${member.user.tag}** is not proposing a QOTW`);
                     }
-                    //context.channel.send(`No one cares that you voted ${context.params.get("vote")} for ${member.user.tag}`);
-                    
                 });
             });
 
@@ -165,7 +162,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
     function propose(context: CommandContext) {
         let question: string = context.params.get("question");
 
-        database.run("CREATE TABLE IF NOT EXISTS qotwpropositions (proposer TEXT, proposed INTEGER, proposedMSG TEXT, question TEXT, y TEXT, n TEXT, a TEXT);", () => {    
+        database.run("CREATE TABLE IF NOT EXISTS qotwpropositions (proposer TEXT, proposed INTEGER, proposedMSG TEXT, question TEXT, y TEXT, n TEXT, a TEXT);", () => {
             QOTWChannel.send(new RichEmbed()
                     // .setColor("#43b581") YES
                     // .setColor("#f04747") NO
@@ -180,7 +177,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                     .setThumbnail(context.user.avatarURL))
                     .then((m) => {
                         let message: Message;
-    
+
                         if (m instanceof Array) {
                             message = m[0];
                         } else {
@@ -200,7 +197,6 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
 
     function listPropositions(context: CommandContext) {
         database.all("SELECT * FROM qotwpropositions", (error, rows: Propisition[]) => {
-            //context.channel.send("```json\n" + (JSON.stringify(rows.map(x => x.question), undefined, 2) || "[]") + "\n```");
             let embed = new RichEmbed()
                             .setColor("#43b581");
 
@@ -209,13 +205,12 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             else for (let prop of rows) {
                 embed.addField(context.guild.member(prop.proposer).user.tag, `**${prop.question}** - ${prop.y.split(",").length}Y ${prop.n.split(",").length}N ${prop.a.split(",").length}A`);
             }
-            
+
             context.channel.send(embed);
         });
     }
     function listQueue(context: CommandContext) {
         database.all("SELECT * FROM qotwqueue", (error, rows: QOTW[]) => {
-            //context.channel.send("```json\n" + (JSON.stringify(rows.map(x => x.question), undefined, 2) || "[]") + "\n```");
             let embed = new RichEmbed()
                             .setColor("#43b581");
 
@@ -224,7 +219,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             else for (let prop of rows) {
                 embed.addField(context.guild.member(prop.proposer).user.tag, prop.question);
             }
-            
+
             context.channel.send(embed);
         });
     }
@@ -348,10 +343,10 @@ function cleanEmbed(embed: MessageEmbed): RichEmbed {
         },
         color: embed.color,
         description: embed.description,
-        fields: embed.fields.map(x => { 
+        fields: embed.fields.map(x => {
             return {
-                name: x.name, 
-                value: x.value, 
+                name: x.name,
+                value: x.value,
                 inline: x.inline
             };
         }),

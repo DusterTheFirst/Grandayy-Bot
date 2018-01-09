@@ -31,7 +31,7 @@ module.exports = (handler: CommandHandler, client: Client, config: Config, datab
     client.once("ready", () => {
         console.log(chalk.green(`Logged in with user ${client.user.username}`));
         client.user.setGame("discord.grande1899.com", "https://www.twitch.tv/dusterthefirst");
-    
+
         //  LOAD COMMANDS
         require(__dirname + "/commandloader")(handler, database, client, config);
 
