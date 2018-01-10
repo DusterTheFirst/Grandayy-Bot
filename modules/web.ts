@@ -215,6 +215,12 @@ module.exports = (client: Client, config: Config, feedbackchannel: TextChannel, 
         }));
     });
 
+    app.post("/memecup/apply", (req, res) => {
+        let jibberish = "";
+        req.on("data", x => jibberish += x);
+        req.on("end", () => res.contentType("json").send(req.body));
+    });
+
     app.post("/feedback", (req, res) => {
         if (!req.body.token || !req.body.type || !req.body.title || !req.body.content) {
             res.status(400);
