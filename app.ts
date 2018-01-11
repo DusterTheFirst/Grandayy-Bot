@@ -1,46 +1,75 @@
 import * as Mechan from "mechan.js";
 import * as Discord from "discord.js";
 import * as fs from "fs";
-import * as SQLite from "sqlite3";
+import { Database, open } from "sqlite";
 import { default as chalk } from "chalk";
-//SQLite.verbose();
+import { CommandErrorType, ParameterType } from "mechan.js";
+import { CommandManager } from "./modules/CommandManager";
+import { TwitterManager } from "./modules/TwitterManager";
+import { WebManager } from "./modules/WebManager";
 
-const config: Config = eval(`
-(function() {
-    return ${fs.readFileSync(__dirname + "/config.json").toString("utf-8")}
-}())`);
+(async () => {
+    const config: Config = eval(`($=>{return ${fs.readFileSync(`${__dirname}/config.json`).toString("utf-8")}})()`);
 
-var handler = new Mechan.CommandHandler({
-    prefix: "-",
-    mentionPrefix: false,
-    helpMode: Mechan.HelpMode.Public,
-    isSelfBot: false
-});
-var client = new Discord.Client({
-    fetchAllMembers: true
-});
+    const handler = new Mechan.CommandHandler({
+        prefix: "-",
+        mentionPrefix: false,
+        helpMode: Mechan.HelpMode.Public,
+        isSelfBot: false
+    });
+    const client = new Discord.Client({
+        fetchAllMembers: true
+    });
 
-var database = new SQLite.Database("./SQL/RobbieBotten.sqlite");
-database.on("trace", (sql) => console.log(chalk.yellow(sql)));
+    const database = await open("./SQL/RobbieBotten.sqlite", { promise: Promise, verbose: true });
+    database.on("trace", (sql) => console.log(chalk.yellow(sql)));
 
-database.serialize(() => {
-    //  LOAD EVENT HANDLERS
-    require(__dirname + "/modules/events")(handler, client, config, database);
-});
+    let commands = new CommandManager(handler, database, client, config);
 
-process.on("beforeExit", (code) => {
-    database.close();
-});
-process.on("uncaughtException", (error) => {
-    console.error(error);
-});
+    let twitter = new TwitterManager(config, client);
 
-handler.install(client)
-    .login(config.token);
+    let web = new WebManager(client, config, database);
 
-process.on("unhandledRejection", (error, p) => {
-    if (error instanceof Error)
-        console.log(`Unhandled promise rejection: ${error.stack}`);
-    else
-        console.log(`Unhandled promise rejection: ${error}`);
-});
+    // EVENTS
+    handler.on("failure", (h, context) => {
+        switch (context.errorType) {
+            case CommandErrorType.BadPermissions:
+            case CommandErrorType.UnknownCommand:
+                break;
+            case CommandErrorType.BadArgCount:
+            case CommandErrorType.InvalidInput:
+                let reqparams = context.command.parameters.filter(x => x && x.type === ParameterType.Required);
+                let reqlength = reqparams && reqparams.length || 0;
+                let totallength = context.command.parameters.length;
+                context.channel.send(`**Invalid arguments:** \`${context.handler.config.prefix}${context.command.fullname}\` requires ${totallength === reqlength ? totallength : `${reqlength} - ${totallength}`} parameters`);
+                break;
+            default:
+                console.log(context.command && context.command.fullname, context.errorType, context.error);
+        }
+    });
+
+    client.on("error", (msg) => { console.error(chalk.red(`[Error] ${msg.stack}`)); });
+    client.on("warn", (msg) => { console.warn(chalk.yellow(`[Warn] ${msg}`)); });
+    client.on("debug", (msg) => { if (!msg.startsWith("[ws]")) console.log(chalk.gray(`[Debug] ${msg}`)); });
+    client.once("ready", () => {
+        console.log(chalk.green(`Logged in with user ${client.user.username}`));
+        client.user.setGame("discord.grande1899.com", "https://www.twitch.tv/dusterthefirst");
+    });
+
+    handler.install(client)
+        .login(config.token);
+
+    // PROCCESS
+    process.on("unhandledRejection", (error, p) => {
+        if (error instanceof Error)
+            console.log(`Unhandled promise rejection: ${error.stack}`);
+        else
+            console.log(`Unhandled promise rejection: ${error}`);
+    });
+    process.on("beforeExit", (code) => {
+        database.close();
+    });
+    process.on("uncaughtException", (error) => {
+        console.error(error);
+    });
+})();

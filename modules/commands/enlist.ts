@@ -1,6 +1,6 @@
 import { CommandHandler } from "mechan.js";
 import { Collection, Client } from "discord.js";
-import { Database } from "sqlite3";
+import { Database } from "sqlite";
 
 module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand("enlist")
@@ -8,7 +8,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         .setCategory("Enlistment")
         .setCallback((context) => {
             try {
-                var role = context.guild.roles.find(x => x.name === "enlisted");
+                let role = context.guild.roles.find(x => x.name === "enlisted");
                 if (context.message.member.roles.some(x => x.name === "enlisted")) {
                     context.message.reply("You already have the role!");
                 } else {

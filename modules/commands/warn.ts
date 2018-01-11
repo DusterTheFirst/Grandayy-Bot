@@ -244,18 +244,18 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 let warnsforuser = currentwarns[context.guild.id][id];
                 if (!warnsforuser) continue;
                 let member = context.guild.members.find("id", id);
-                
+
                 let output = new RichEmbed()
                                 .setColor("#43b581")
                                 .setTitle(`Warnings for ${member && member.user.tag || id}`)
                                 .setDescription(`${member && member.user.tag || id} has ${warnsforuser.length} warning${warnsforuser.length != 1 ? "s" : ""}`);
-    
+
                 for (let warn of warnsforuser) {
                     if (!warn) continue;
                     let warned = context.guild.members.find("id", warn.warned);
                     output.addField(warn.reason !== "" ? warn.reason : "No reason", `${new Date(warn.date).toUTCString()} - ${warned && warned.user.tag || warn.warned}`);
                 }
-    
+
                 context.channel.send(output);
             }
         });

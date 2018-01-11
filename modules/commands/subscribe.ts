@@ -1,8 +1,8 @@
 import { CommandHandler, ParameterType } from "mechan.js";
 import { Collection, Client, RichEmbed } from "discord.js";
-import { Database } from "sqlite3";
+import { Database } from "sqlite";
 
-interface Subscription { 
+interface Subscription {
     name: string;
     description: string;
     role: string;
@@ -66,7 +66,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 return;
             }
 
-            var role = context.guild.roles.find(x => x.name === sub.role);
+            let role = context.guild.roles.find(x => x.name === sub.role);
 
             if (!role) {
                 context.channel.send(`I cannot find the role for **${keyword}**`);
@@ -94,7 +94,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                 return;
             }
 
-            var role = context.guild.roles.find(x => x.name === sub.role);
+            let role = context.guild.roles.find(x => x.name === sub.role);
             if (!role) {
                 context.channel.send(`I cannot find the role for  **${keyword}**`);
                 return;

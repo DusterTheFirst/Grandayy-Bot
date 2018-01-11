@@ -31,18 +31,18 @@ class Paginator {
         this.next = "▶";
         this.last = "⏭";
 
-        channel.send(pages[0]).then((msg) => {
+        channel.send(pages[0]).then(async (msg) => {
             /**
              * Message sent
              * @type {Message}
              */
             this.message = msg as Message;
-            
-            this.message.react(this.first).then(() =>
-                this.message.react(this.back).then(() =>
-                    this.message.react(this.stop).then(() =>
-                        this.message.react(this.next).then(() =>
-                            this.message.react(this.last)))));
+
+            await this.message.react(this.first);
+            await this.message.react(this.back);
+            await this.message.react(this.stop);
+            await this.message.react(this.next);
+            await this.message.react(this.last);
 
             this.collector = this.message.createReactionCollector((reaction, user) => reaction.me && user.id === dad.id && user.id !== this.message.author.id, {time: 100000});
             this.collector.on("collect", (reaction, collector) => {
@@ -59,7 +59,7 @@ class Paginator {
                         this.collector.stop();
                         this.message.clearReactions();
                         break;
-                        
+
                     case this.back:
                         this.current--;
                         if (this.current < 0)
