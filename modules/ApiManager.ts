@@ -1,9 +1,11 @@
 import { Client, Channel, Collection, Guild, GuildMember, TextChannel, RichEmbed, Role } from "discord.js";
 import * as Mechan from "mechan.js";
 import * as https from "https";
+import * as http from "http";
 import * as helmet from "helmet";
 import * as fs from "fs";
 import * as bodyParser from "body-parser";
+let proxy: (url: string, options: any) => any = require("express-http-proxy");
 import { NextFunction, Response, Request, Router } from "express";
 import { Database } from "sqlite";
 
@@ -215,33 +217,34 @@ export class ApiManager {
 
         */
 
-        this.router.get("/memecup/players", (req, res) => {
-            res.contentType("json").send(JSON.stringify([
-                {
-                    "name": "val",
-                    "kills": "69",
-                    "status": "alive"
-                },
-                {
-                    "name": "eve",
-                    "kills": "1",
-                    "status": "alive"
-                }
-            ]));
-        });
+        // this.router.get("/memecup", (req, res) => {
 
-        this.router.get("/memecup", (req, res) => {
-            res.contentType("json").send(JSON.stringify({
-                "status": "down",
-                "location": "eu",
-                "ping": "12",
-                "uptime": "2 years"
-            }));
-        });
+        //     http.get("http://52.169.6.4:14408/", (response) => {
+        //         let resp = "";
+        //         response.on("data", x => resp += x);
+        //         response.on("end", () => {
+        //             let jsonresp = JSON.parse(resp);
 
-        this.router.post("/memecup/apply", (req, res) => {
-            res.contentType("json").send(req.body);
-        });
+        //             jsonresp.status = "up";
+
+        //             res.contentType("json").send(JSON.stringify(jsonresp));
+        //         });
+        //     }).on("error", () => {
+        //         res.contentType("json").send(JSON.stringify({
+        //             status: "down"
+        //         }));
+        //     });
+        // });
+
+        // this.router.use("/memecup/map", proxy("http://52.169.6.4:8123/", {
+        //     userResHeaderDecorator(/* headers, userReq, userRes, proxyReq, proxyRes*/) {
+        //       // recieves an Object of headers, returns an Object of headers.
+        //       let out: any = {
+        //           "X-Frame-Options": undefined // "ALLOW-FROM https://grandayyy.github.io/"
+        //       };
+        //       return out;
+        //     }
+        //   }));
 
         this.router.post("/feedback", (req, res) => {
             if (!req.body.token || !req.body.type || !req.body.title || !req.body.content) {

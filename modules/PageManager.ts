@@ -15,7 +15,3 @@ export class PageManager {
         this.database = database;
     }
 }
-
-export class JSSPMethods {
-
-}

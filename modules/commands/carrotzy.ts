@@ -14,6 +14,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
 
             if (image === undefined || image === {}) {
                 context.channel.send("**Please attach an image, or give a url to an image**");
+                context.channel.stopTyping();
                 return;
             }
 
