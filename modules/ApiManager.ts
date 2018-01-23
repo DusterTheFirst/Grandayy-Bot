@@ -6,7 +6,7 @@ import * as helmet from "helmet";
 import * as fs from "fs";
 import * as bodyParser from "body-parser";
 let proxy: (url: string, options: any) => any = require("express-http-proxy");
-import { NextFunction, Response, Request, Router } from "express";
+import { NextFunction, Response, Request, Router, Application } from "express";
 import { Database } from "sqlite";
 
 import chalk from "chalk";
@@ -39,7 +39,7 @@ export class ApiManager {
     public feedbackchannel: TextChannel;
     private guild: Guild;
 
-    constructor(router: Router, client: Client, config: Config, database: Database) {
+    constructor(app: Application, router: Router, client: Client, config: Config, database: Database) {
         this.router = router;
         this.config = config;
         this.client = client;

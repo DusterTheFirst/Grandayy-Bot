@@ -38,8 +38,8 @@ export class WebManager {
             next();
         });
 
-        this.pages = new PageManager(Router(), client, config, database);
-        this.api = new ApiManager(Router(), client, config, database);
+        this.pages = new PageManager(this.app, Router(), client, config, database);
+        this.api = new ApiManager(this.app, Router(), client, config, database);
 
         this.app.use("/", this.pages.router);
         this.app.use("/api", this.api.router);
