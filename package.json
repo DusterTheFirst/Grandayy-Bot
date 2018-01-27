@@ -7,6 +7,7 @@
     "name": "DusterTheFirst"
   },
   "dependencies": {
+    "@types/ws": "^4.0.0",
     "body-parser": "^1.18.2",
     "chalk": "^2.3.0",
     "discord.js": "^11.2.1",
@@ -19,7 +20,8 @@
     "mechan.js": "^2.2.6",
     "nunjucks": "^3.0.1",
     "sqlite": "^2.9.0",
-    "twitter": "^1.7.1"
+    "twitter": "^1.7.1",
+    "ws": "^4.0.0"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",

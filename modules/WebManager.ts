@@ -49,8 +49,8 @@ export class WebManager {
         });
 
         let server = https.createServer({
-            key: fs.readFileSync("key.crt"),
-            cert: fs.readFileSync("certificate.crt")
+            key: fs.readFileSync("./certs/key.crt"),
+            cert: fs.readFileSync("./certs/cert.crt")
         }, this.app);
 
         server.listen(8080);

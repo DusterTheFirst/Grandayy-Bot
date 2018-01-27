@@ -1,21 +1,17 @@
-{# {{"<!--"}}{% include "LICENSE" %}{{"-->"}} #}
 <!DOCTYPE html>
-<html>
+<html {# prefix="og: http://ogp.me/ns#" #}>
     <head>
         <!-- COMMON -->
-        <title>{{meta.title}}</title>
+        <title>{{meta.name}}</title>
         <link rel='icon' href='{{meta.icon}}'>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="utf-8">
         <!-- STYLES -->
         {% block css %}
-        <link rel="stylesheet" href="/styles.css">
-        <link rel="stylesheet" href="/stylesm.css" media="only screen and (max-width: 768px)">
         {% endblock %}
         <!-- SCRIPTS -->
-        <script src="/globals/util.js"></script>
+        <script src="/scripts/util.js"></script>
         {% block js %}
-        <script src="scripts.js"></script>
         {% endblock %}
         <!-- Search Engine -->
         <meta name="description" content="{{meta.description}}">
@@ -26,23 +22,32 @@
         <meta itemprop="image" content="{{meta.icon}}">
         <!-- Twitter -->
         <meta name="twitter:card" content="summary">
-        <meta name="twitter:title" content="{{meta.title}}">
+        <meta name="twitter:title" content="{{meta.name}}">
         <meta name="twitter:description" content="{{meta.description}}">
         <meta name="twitter:image:src" content="{{meta.icon}}">
+        <meta name="twitter:creator" content="dusterthefirst">
         <!-- Open Graph general (Discord) -->
-        <meta name="og:title" content="{{meta.title}}">
-        <meta name="og:description" content="{{meta.description}}">
-        <meta name="og:image" content="{{meta.description}}">
-        <meta name="og:url" content="{{meta.url}}">
-        <meta name="og:site_name" content="{{meta.title}}">
-        <meta name="og:locale" content="en_US">
-        <meta name="og:type" content="website">
+        <meta property="og:url" content="{{meta.url}}">
+        <meta property="og:site_name" content="{{meta.name}}">
+        <meta property="og:title" content="{{meta.name}}">
+        <meta property="og:description" content="{{meta.description}}">
+        <meta property="og:image" content="{{meta.icon}}">
+        <meta property="og:locale" content="en_US">
+        {# <meta property="og:type" content="website"> #}
+        {{hotreload | safe}}
     </head>
     <body>
-        {{"jeff" | capitalize}}
-        {# {% %} #}
-        <pre><code>{{meta | dump(4)}}</code></pre>
-        <h1>{{meta.name}}</h1>
-        <h2>{{meta.description}}</h2>
+        <header>
+            h<br>
+            e<br>
+            a<br>
+            d<br>
+            e<br>
+            r<br>
+        </header>
+        <div>
+            {% block body %}
+            {% endblock %}
+        </div>
     </body>
 </html>
