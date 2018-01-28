@@ -72,8 +72,20 @@ export class PageManager {
             watch: true
         });
 
-        router.use("*", (req, res, next) => {
+        router.use("*", async (req, res, next) => {
+            let user: OAuthUser = req.cookies && req.cookies.discord_token
+                    ? await this.getUserData(JSON.parse(req.cookies.discord_token))
+                    : {
+                        avatar: "a",
+                        avatarURL: "a",
+                        discriminator: "a",
+                        id: "a",
+                        username: "a friggen nerd",
+                        verified: false
+                    };
+
             console.log(`${chalk.yellow(req.ip.replace("::ffff:", ""))} requested "${chalk.green(req.baseUrl)}" with method ${chalk.green(req.method)} at the domain ${chalk.blue(req.hostname)} which was referred by ${chalk.blue(req.header("Referer"))}`);
+            console.log(`${chalk.yellowBright("BONUS STALKAGE::::::::")} User logged in as "${user.username}" from ${chalk.yellow(req.ip.replace("::ffff:", ""))}`);
             next();
         });
 
@@ -287,7 +299,7 @@ interface OAuthUser {
     discriminator: string;
     avatar: string;
     avatarURL: string;
-    verified: true;
+    verified: boolean;
 }
 
 interface OAuth {

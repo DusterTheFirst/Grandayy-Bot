@@ -17,6 +17,10 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         .setTitle("PASSED PROPOSAL")
                         .setColor(config.colors.green)
                         .setDescription(context.params.get("proposal")));
+
+            try {
+                context.message.delete();
+            } catch {}
         });
 
     handler.createCommand("fail")
@@ -29,6 +33,10 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                         .setTitle("FAILED PROPOSAL")
                         .setColor(config.colors.red)
                         .setDescription(context.params.get("proposal")));
+
+            try {
+                context.message.delete();
+            } catch {}
         });
 };
 
