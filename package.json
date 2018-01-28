@@ -7,9 +7,9 @@
     "name": "DusterTheFirst"
   },
   "dependencies": {
-    "@types/ws": "^4.0.0",
     "body-parser": "^1.18.2",
     "chalk": "^2.3.0",
+    "cookie-parser": "^1.4.3",
     "discord.js": "^11.2.1",
     "express": "^4.16.2",
     "express-http-proxy": "^1.1.0",
@@ -18,6 +18,7 @@
     "jimp": "^0.2.28",
     "lodash": "^4.17.4",
     "mechan.js": "^2.2.6",
+    "node-sass": "^4.7.2",
     "nunjucks": "^3.0.1",
     "sqlite": "^2.9.0",
     "twitter": "^1.7.1",
@@ -25,10 +26,13 @@
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
+    "@types/cookie-parser": "^1.4.1",
     "@types/express": "^4.0.39",
     "@types/helmet": "0.0.37",
     "@types/lodash": "^4.14.92",
     "@types/node": "^8.0.54",
-    "@types/nunjucks": "^3.0.0"
+    "@types/node-sass": "^3.10.32",
+    "@types/nunjucks": "^3.0.0",
+    "@types/ws": "^4.0.0"
   }
 }

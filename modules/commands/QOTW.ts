@@ -3,7 +3,11 @@ import { Collection, Client, TextChannel, RichEmbed, Message, ReactionCollector,
 import { Database } from "sqlite";
 import humanize = require("humanize-duration");
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+let config: Config;
+
+module.exports = (handler: CommandHandler, database: Database, client: Client, cfg: Config) => {
+    config = cfg;
+
     let QOTWChannel = client.channels.get(config.QOTWsubmissions) as TextChannel;
 
 
@@ -153,9 +157,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
 
         database.run("CREATE TABLE IF NOT EXISTS qotwpropositions (proposer TEXT, proposed INTEGER, proposedMSG TEXT, question TEXT, y TEXT, n TEXT, a TEXT);", () => {
             QOTWChannel.send(new RichEmbed()
-                    // .setColor("#43b581") YES
-                    // .setColor("#f04747") NO
-                    .setColor("#faa61a")
+                    .setColor(config.colors.yellow)
                     .setTitle(`QOTW proposed by ${context.user.tag}`)
                     .setDescription(`**Question:** ${question}\n\n**Command: **-qotw vote ${context.user.tag}`)
                     .setFooter("Awaiting votes...")
@@ -182,7 +184,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
     async function listPropositions(context: CommandContext) {
         let propositions = await database.all("SELECT * FROM qotwpropositions");
         let embed = new RichEmbed()
-                        .setColor("#43b581");
+                        .setColor(config.colors.green);
 
         if (!propositions)
             embed.setDescription("No propositions");
@@ -195,7 +197,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
     async function listQueue(context: CommandContext) {
         let queue = await database.all("SELECT * FROM qotwqueue");
         let embed = new RichEmbed()
-                        .setColor("#43b581");
+                        .setColor(config.colors.green);
 
         if (!queue)
             embed.setDescription("No queue");
@@ -212,10 +214,10 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         if (!message) return;
 
         let oldEmbed = cleanEmbed(message.embeds[0]);
-        message.edit("", { embed: oldEmbed.setColor("#f04747").setFooter("CLOSED") });
+        message.edit("", { embed: oldEmbed.setColor(config.colors.red).setFooter("CLOSED") });
         message.guild.member(proposition.proposer)
             .send("", new RichEmbed()
-                    .setColor("#f04747")
+                    .setColor(config.colors.red)
                     .setTitle(`QOTW "${proposition.question}" was not accepted`)
                     .setDescription(`Your QOTW was not accepted, due to it not getting enough votes`)
                     .setTimestamp());
@@ -229,10 +231,10 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         if (!message) return;
 
         let oldEmbed = cleanEmbed(message.embeds[0]);
-        message.edit("", { embed: oldEmbed.setColor("#43b581").setFooter("PASSED") });
+        message.edit("", { embed: oldEmbed.setColor(config.colors.green).setFooter("PASSED") });
         message.guild.member(proposition.proposer)
             .send("", new RichEmbed()
-                    .setColor("#43b581")
+                    .setColor(config.colors.green)
                     .setTitle(`QOTW "${proposition.question}" was accepted`)
                     .setDescription(`Your QOTW was accepted, it won with ${getArrayfromString(proposition.y).length} upd00ts`)
                     .setTimestamp());
@@ -372,7 +374,7 @@ function isStaff(context: CommandContext) {
     let is = context.guild.id === "372420841943859210" && (context.member.roles.array().filter(x => x.name !== "@everyone").length > 0);
 
     if (!is) {
-        context.channel.send(new RichEmbed().setColor("#f04747").attachFile("./modules/commands/res/hahaYES.png").setImage("attachment://hahaYES.png"));
+        context.channel.send(new RichEmbed().setColor(config.colors.red).attachFile("./modules/commands/res/hahaYES.png").setImage("attachment://hahaYES.png"));
     }
 
     return is;

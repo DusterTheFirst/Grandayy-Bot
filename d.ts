@@ -1,6 +1,8 @@
 interface Config {
     /** Bot token */
     token: string;
+    /** Bot client secret */
+    clientsecret: string;
     /** Guild to stalk */
     guild: string;
     /** Twitter API */
@@ -13,6 +15,11 @@ interface Config {
         channel: string,
         /** Users to watch */
         users: number[]
+    };
+    colors: {
+        green: string,
+        red: string,
+        yellow: string
     };
     /** Channel for QOTW submissions to be approved in */
     QOTWsubmissions: string;
@@ -29,6 +36,10 @@ interface Config {
     };
     /** Channel for voting */
     voteschannel: string;
+    /** Channel for passed proposals */
+    passedproposalschannel: string;
+    /** Channel for failed proposals */
+    failedproposalschannel: string;
     /** Status identifiers */
     statuses: {
         [x: string]: string[]

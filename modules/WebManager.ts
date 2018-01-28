@@ -5,6 +5,7 @@ import { Application, Router } from "express";
 import * as helmet from "helmet";
 import * as fs from "fs";
 import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser";
 import * as https from "https";
 import { PageManager } from "./PageManager";
 import { ApiManager } from "./APIManager";
@@ -32,6 +33,7 @@ export class WebManager {
         this.app.use(bodyParser.urlencoded({
             extended: true
         }));
+        this.app.use(cookieParser());
         this.app.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

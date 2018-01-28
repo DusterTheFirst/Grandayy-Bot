@@ -16,7 +16,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         .setCategory("Subscription Commands")
         .setCallback((context) => {
             let embed = new RichEmbed()
-                                .setColor("#43b581");
+                                .setColor(config.colors.green);
 
             for (let sub of subscriptions) {
                 embed.addField(sub.name, sub.description);
