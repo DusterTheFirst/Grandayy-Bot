@@ -3,7 +3,7 @@ import { Collection, Client } from "discord.js";
 import * as Jimp from "jimp";
 import { Database } from "sqlite";
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand("carrotzy")
         .addParameter("image url", ParameterType.Optional)
         .setDescription("Carrotzify the image from the url or the attached image")
@@ -21,7 +21,9 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             let imageurl = image.url;
 
             let inputtedimage = await Jimp.read(imageurl).catch((reason) => {
-                context.message.channel.send(`**${reason}**`);
+                if (reason instanceof Error && reason.message.includes("no such file or directory,")) context.message.channel.send(`**Invalid URL**`);
+                else context.message.channel.send(`**${reason}**`);
+                context.channel.stopTyping();
                 return;
             });
             if (inputtedimage) {
@@ -33,6 +35,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
                                 name: "carrot.png"
                             }]
                         });
+                        context.channel.stopTyping();
                     });
             }
         });

@@ -1,9 +1,11 @@
 import { CommandHandler } from "mechan.js";
 import { Collection, Client } from "discord.js";
 import { Database } from "sqlite";
+import { grandayyServer } from "./precheck";
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand("enlist")
+        .addCheck(grandayyServer)
         .setDescription("Enlist yourself")
         .setCategory("Enlistment")
         .setCallback((context) => {

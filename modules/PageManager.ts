@@ -318,18 +318,3 @@ interface PageMeta {
     name: string;
     url: string;
 }
-
-/**
- * Get a guild member from the given guild
- */
-function getGuildMember(x: string, guild: Guild) {
-    let mems = guild.members;
-    return mems.get(x)
-        || mems.find(m =>
-            m.user.username.toLowerCase() === x.toLowerCase()
-            || m.displayName.toLowerCase() === x.toLowerCase()
-            || m.user.tag.toLowerCase() === x.toLowerCase()
-            || m.id.toLowerCase() === x.toLowerCase()
-            || m.toString().toLowerCase().replace("!", "") === x.toLowerCase().replace("!", ""))
-        || null;
-}

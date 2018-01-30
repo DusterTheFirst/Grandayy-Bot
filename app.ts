@@ -34,7 +34,9 @@ import { WebManager } from "./modules/WebManager";
     handler.on("failure", (h, context) => {
         switch (context.errorType) {
             case CommandErrorType.BadPermissions:
+                break;
             case CommandErrorType.UnknownCommand:
+                // context.channel.send(`Unknown command ${context.handler.config.prefix}**${context.content.split(" ")[0].replace("-", "")}**`);
                 break;
             case CommandErrorType.BadArgCount:
             case CommandErrorType.InvalidInput:

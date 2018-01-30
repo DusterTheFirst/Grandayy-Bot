@@ -20,7 +20,7 @@ export class CommandManager {
         for (let file of files) {
             if (fs.lstatSync(`${__dirname}/commands/${file}`).isFile())
                 try {
-                    require(`${__dirname}/commands/${file}`)(handler, database, client, config);
+                    require(`${__dirname}/commands/${file}`).init(handler, database, client, config);
                 } catch (e) {
                     // console.log(e);
                 }

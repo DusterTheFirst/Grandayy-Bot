@@ -3,7 +3,7 @@ import { Collection, Client, RichEmbed } from "discord.js";
 import { Database } from "sqlite";
 import humanize = require("humanize-duration");
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand("info")
         .setDescription("Get some of dat info")
         .setCategory("Info Commands")

@@ -5,6 +5,8 @@ interface Config {
     clientsecret: string;
     /** Guild to stalk */
     guild: string;
+    /** Staff guild */
+    staffguild: string;
     /** Twitter API */
     twitter: {
         consumer_key: string,

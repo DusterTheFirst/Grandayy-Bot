@@ -1,10 +1,11 @@
 import { CommandHandler, CommandContext, ParameterType } from "mechan.js";
 import { Collection, Client, RichEmbed, TextChannel } from "discord.js";
 import { Database } from "sqlite";
+import { isStaff } from "./precheck";
 
 let config: Config;
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, cfg: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, cfg: Config) => {
     config = cfg;
 
     handler.createCommand("pass")
@@ -39,16 +40,3 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
             } catch {}
         });
 };
-
-/**
- * Checks if the member is in the mod server
- */
-function isStaff(context: CommandContext) {
-    let is = context.guild.id === "372420841943859210" && (context.member.roles.array().filter(x => x.name !== "@everyone").length > 0);
-
-    if (!is) {
-        context.channel.send(new RichEmbed().setColor(config.colors.red).attachFile("./modules/commands/res/hahaYES.png").setImage("attachment://hahaYES.png"));
-    }
-
-    return is;
-}

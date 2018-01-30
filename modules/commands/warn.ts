@@ -12,7 +12,7 @@ interface Warning {
 
 /*
 /// USE COLLECTIONS NOT LISTS
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand("resetwarndb")
         .setCategory("Dad Commands")
         .addCheck((context) => context.user.id === "168827261682843648")
@@ -374,25 +374,3 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         //ADD TO WEBHOKTHING
 }
 */
-
-/**
- * Checks if the member is a moderator
- */
-function isMod(context: CommandContext) {
-    return context.message.member.hasPermission("KICK_MEMBERS");
-}
-
-/**
- * Get a guild member from the given guild
- */
-function getGuildMember(x: string, guild: Guild) {
-    let mems = guild.members;
-    return mems.get(x)
-        || mems.find(m =>
-                m.user.username.toLowerCase() === x.toLowerCase()
-            || m.displayName.toLowerCase() === x.toLowerCase()
-            || m.user.tag.toLowerCase() === x.toLowerCase()
-            || m.id.toLowerCase() === x.toLowerCase()
-            || m.toString().toLowerCase() === x.toLowerCase())
-        || null;
-}

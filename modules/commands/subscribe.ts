@@ -1,6 +1,7 @@
 import { CommandHandler, ParameterType } from "mechan.js";
 import { Collection, Client, RichEmbed } from "discord.js";
 import { Database } from "sqlite";
+import { grandayyServer } from "./precheck";
 
 interface Subscription {
     name: string;
@@ -10,8 +11,9 @@ interface Subscription {
 
 const subscriptions: Subscription[] = require("./res/subscriptions.json");
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createNestedCommand("subscriptions all")
+        .addCheck(grandayyServer)
         .setDescription("List all possible subscriptions")
         .setCategory("Subscription Commands")
         .setCallback((context) => {
@@ -26,6 +28,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         });
 
     handler.createNestedCommand("subscriptions mine")
+        .addCheck(grandayyServer)
         .setDescription("List all subscriptions you have")
         .setCategory("Subscription Commands")
         .setCallback((context) => {
@@ -54,6 +57,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         });
 
     handler.createNestedCommand("subscribe to")
+        .addCheck(grandayyServer)
         .addParameter("keyword", ParameterType.Required)
         .setDescription("Subscribe to some channels")
         .setCategory("Subscription Commands")
@@ -82,6 +86,7 @@ module.exports = (handler: CommandHandler, database: Database, client: Client, c
         });
 
     handler.createNestedCommand("unsubscribe from")
+        .addCheck(grandayyServer)
         .addParameter("keyword", ParameterType.Required)
         .setDescription("Unsubscribe from some channels")
         .setCategory("Subscription Commands")

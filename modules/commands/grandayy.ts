@@ -3,7 +3,7 @@ import { Collection, Client } from "discord.js";
 import * as Jimp from "jimp";
 import { Database } from "sqlite";
 
-module.exports = (handler: CommandHandler, databaseL: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, databaseL: Database, client: Client, config: Config) => {
     handler.createCommand("grandayy")
         .addParameter("image url", ParameterType.Optional)
         .setDescription("Grandayyify the image from the url or the attached image")
@@ -23,8 +23,10 @@ module.exports = (handler: CommandHandler, databaseL: Database, client: Client, 
             let watermark = await Jimp.read(`${__dirname}/res/watermark.png`);
             watermark = watermark.opacity(.75);
 
-            let inputtedimage = await Jimp.read(imageurl).catch((reason) => {
-                context.message.channel.send(`**${reason}**`);
+            let inputtedimage = await Jimp.read(imageurl).catch((reason: string | Error) => {
+                if (reason instanceof Error && reason.message.includes("no such file or directory,")) context.message.channel.send(`**Invalid URL**`);
+                else context.message.channel.send(`**${reason}**`);
+                context.channel.stopTyping();
                 return;
             });
 
@@ -38,6 +40,7 @@ module.exports = (handler: CommandHandler, databaseL: Database, client: Client, 
                                 name: "grandayy.png"
                             }]
                         });
+                        context.channel.stopTyping();
                     });
             }
         });

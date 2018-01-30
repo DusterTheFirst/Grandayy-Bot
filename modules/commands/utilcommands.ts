@@ -2,7 +2,7 @@ import { CommandHandler, ParameterType } from "mechan.js";
 import { Collection, Client } from "discord.js";
 import { Database } from "sqlite";
 
-module.exports = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
+module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createCommand("gmt")
         .addParameter("format", ParameterType.Optional)
         .setDescription("Get the current time in GMT")
