@@ -21,8 +21,6 @@ function a(errororcode: Error | number | String) {
     } else if(typeof errororcode === "string" || errororcode instanceof String) {
         message = errororcode;
     }
-
-    console.log(message);
     new WebhookClient("407690848327958538", "WNr2njzAyONI_-NdcI1NnpXuItfaTR_0B1IZYoL1sY1bdDspv7Umidh-HUdoA8-MydDn")
         .send(new RichEmbed()
             .setColor("#f04747")

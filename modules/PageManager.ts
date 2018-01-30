@@ -59,7 +59,7 @@ export class PageManager {
                         file: `./modules/pages/sass/${file}`,
                         outputStyle: "compressed"
                     });
-                    fs.writeFileSync(`./modules/pages/sass/compiled/${file.replace(/.scss$/, ".css")}`, newfile.css);
+                    fs.writeFileSync(`./modules/pages/sass/${file.replace(/.scss$/, ".css")}`, newfile.css);
                     console.log(`${chalk.yellow(file.toString())} edited, ${chalk.red("compiling into css")}`);
                 } finally { }
             });
@@ -138,7 +138,7 @@ export class PageManager {
             res.contentType("js");
             let filename = req.params.filename as string;
             let filepath = `./modules/pages/scripts/${filename}`;
-            if (filename.startsWith("_") || !filename) {
+            if (filename.endsWith(".ts") || !filename) {
                 res.sendStatus(403);
                 return;
             }
@@ -150,8 +150,8 @@ export class PageManager {
         router.get("/styles/:filename", (req, res) => {
             res.contentType("css");
             let filename = req.params.filename as string;
-            let filepath = `./modules/pages/sass/compiled/${filename}`;
-            if (!filename) {
+            let filepath = `./modules/pages/sass/${filename}`;
+            if (filename.endsWith(".ts") || !filename) {
                 res.sendStatus(403);
                 return;
             }
