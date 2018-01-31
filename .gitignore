@@ -1,6 +1,7 @@
 config.json
 *.crt
 *.js
+*.css
 /SQL
 .code-workspace
 ## tsconfig.json
