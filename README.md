@@ -30,12 +30,12 @@ The bot is created and maintained by [DusterTheFirst](https://github.com/dustert
 | -------------------------- | -------------------------- |
 | `-grandayy` or `-carrotzy` | Perpetual typing sometimes |
 | `-v`                       | it dont                    |
-
-
-
-<footer style="padding-top: 50px; text-align: center">
-    <small>
-        &copy;<a href="https://github.com/dusterthefirst">DusterTheFirst</a> 2018<br>
-        pls no steal
-    </small>
-</footer>
+<br>
+<br>
+<br>
+<br>
+<br>
+<center>
+    &copy;<a href="https://github.com/dusterthefirst">DusterTheFirst</a> 2018<br>
+    pls no steal
+</center>
