@@ -12,7 +12,6 @@ interface Subscription {
 const subscriptions: Subscription[] = require("./res/subscriptions.json");
 
 module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
-    console.log(handler);
     handler.createNestedCommand("subscriptions all")
         .addCheck(grandayyServer)
         .setDescription("List all possible subscriptions")

@@ -14,6 +14,8 @@ process.on("exit", a);
 process.on("uncaughtException", a);
 process.on("unhandledRejection", a);
 function a(errororcode: Error | number | String) {
+    console.error(errororcode);
+
     let message: String = "RobbieBotten Exited";
 
     if (errororcode instanceof Error) {

@@ -64,6 +64,17 @@ export class PageManager {
                 } finally { }
             });
         }
+        let sassfiles = fs.readdirSync("./modules/pages/sass");
+        for (let sfile of sassfiles) {
+            if (sfile.includes(".css")) return;
+            try {
+                let newfile = sass.renderSync({
+                    file: `./modules/pages/sass/${sfile}`,
+                    outputStyle: "compressed"
+                });
+                fs.writeFileSync(`./modules/pages/sass/${sfile.replace(/.scss$/, ".css")}`, newfile.css);
+            } finally { }
+        }
 
         nunjucks.configure("./modules/pages", {
             autoescape: true,
@@ -151,7 +162,7 @@ export class PageManager {
             res.contentType("css");
             let filename = req.params.filename as string;
             let filepath = `./modules/pages/sass/${filename}`;
-            if (filename.endsWith(".ts") || !filename) {
+            if (filename.endsWith(".scss") || !filename) {
                 res.sendStatus(403);
                 return;
             }
@@ -178,7 +189,7 @@ export class PageManager {
             name: "404 Page Not Found",
             url: "https://google.com"
         };
-        console.log(req);
+        // console.log(req);
         res.render("404.njk", {
             meta: meta,
             hotreload: this.hotreload,

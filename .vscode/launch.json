@@ -10,7 +10,7 @@
             "restart": true,
             "name": "Run Bot",
             "program": "${workspaceFolder}\\app.js",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
         }
     ]
 }
