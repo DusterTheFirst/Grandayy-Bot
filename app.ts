@@ -79,7 +79,20 @@ function a(errororcode: Error | number | String) {
     client.on("debug", (msg) => { if (!msg.startsWith("[ws]")) console.log(chalk.gray(`[Debug] ${msg}`)); });
     client.once("ready", () => {
         console.log(chalk.green(`Logged in with user ${client.user.username}`));
-        client.user.setGame("discord.grande1899.com", "https://www.twitch.tv/dusterthefirst");
+        let statuses = [
+            "-help",
+            "{users} users",
+            "1 guild",
+            "( ͡° ͜ʖ ͡°)",
+            "call me",
+            "aaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        ];
+        setInterval(() => {
+            let i = Math.floor(Math.random() * (statuses.length - 1));
+            let game = statuses[i].replace(/{users}/g, client.guilds.get(config.guild).memberCount.toString());
+            client.user.setGame(game);
+        }, 60000);
+        // client.user.setGame("-help"/*, "https://www.twitch.tv/dusterthefirst" */);
     });
 
     handler.install(client)
