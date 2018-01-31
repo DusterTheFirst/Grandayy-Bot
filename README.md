@@ -4,7 +4,7 @@
 
 ## About
 Robbie Botten is a private bot created exclusivly for Grandayy's Discord guild
-The bot is created and maintained by [DusterTheFirst](https://github.com/dusterthefirst)
+The bot is created and maintained by [DusterTheFirst](https://github.com/DusterTheFirst)
 
 ## What does it do?
 *e v e r y t h i n g*™
@@ -35,7 +35,7 @@ The bot is created and maintained by [DusterTheFirst](https://github.com/dustert
 <br>
 <br>
 <br>
-<center>
+<p align="center">
     &copy;<a href="https://github.com/dusterthefirst">DusterTheFirst</a> 2018<br>
     pls no steal
-</center>
+</p>
