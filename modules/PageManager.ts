@@ -3,6 +3,7 @@ import { Client, Guild } from "discord.js";
 import { Router, Application, Request, Response, NextFunction } from "express";
 import * as nunjucks from "nunjucks";
 import * as ws from "ws";
+import * as http from "http";
 import * as https from "https";
 import * as fs from "fs";
 import * as url from "url";
@@ -12,6 +13,7 @@ import chalk from "chalk";
 import * as sass from "node-sass";
 import * as querystring from "querystring";
 import { OAuthCodeExpiredError } from "./Error";
+import { WebManager } from "./WebManager";
 
 export class PageManager {
     public router: Router;
@@ -32,12 +34,22 @@ export class PageManager {
             this.guild = client.guilds.get(config.guild);
         });
 
+
+        let sassfiles = fs.readdirSync("./modules/pages/sass");
+        for (let sfile of sassfiles) {
+            if (sfile.includes(".css")) continue;
+            try {
+                let newfile = sass.renderSync({
+                    file: `./modules/pages/sass/${sfile}`,
+                    outputStyle: "compressed"
+                });
+                fs.writeFileSync(`./modules/pages/sass/${sfile.replace(/.scss$/, ".css")}`, newfile.css);
+            } catch { }
+        }
+
         if (this.devmode) {
             this.hotreload = `<script src="/scripts/hotreload.js"></script>`;
-            let hotreloadserver = https.createServer({
-                key: fs.readFileSync("./certs/key.crt"),
-                cert: fs.readFileSync("./certs/cert.crt"),
-            }, (req, res) => { res.write("a"); res.end(); });
+            let hotreloadserver = http.createServer();
             let hotreloadwss = new ws.Server({
                 server: hotreloadserver
             });
@@ -45,7 +57,7 @@ export class PageManager {
             fs.watch("./modules/pages", {
                 recursive: true
             }).on("change", (e, file: String) => {
-                if (file.includes(".scss")) return;
+                if (file.includes(".scss") || file.includes(".ts")) return;
                 hotreloadwss.clients.forEach((wsocket) => {
                     if (wsocket.readyState = ws.OPEN)
                         wsocket.send(file);
@@ -63,17 +75,6 @@ export class PageManager {
                     console.log(`${chalk.yellow(file.toString())} edited, ${chalk.red("compiling into css")}`);
                 } finally { }
             });
-        }
-        let sassfiles = fs.readdirSync("./modules/pages/sass");
-        for (let sfile of sassfiles) {
-            if (sfile.includes(".css")) return;
-            try {
-                let newfile = sass.renderSync({
-                    file: `./modules/pages/sass/${sfile}`,
-                    outputStyle: "compressed"
-                });
-                fs.writeFileSync(`./modules/pages/sass/${sfile.replace(/.scss$/, ".css")}`, newfile.css);
-            } finally { }
         }
 
         nunjucks.configure("./modules/pages", {
@@ -95,8 +96,10 @@ export class PageManager {
                         verified: false
                     };
 
-            console.log(`${chalk.yellow(req.ip.replace("::ffff:", ""))} requested "${chalk.green(req.baseUrl)}" with method ${chalk.green(req.method)} at the domain ${chalk.blue(req.hostname)} which was referred by ${chalk.blue(req.header("Referer"))}`);
-            console.log(`${chalk.yellowBright("BONUS STALKAGE::::::::")} User logged in as "${user.username}" from ${chalk.yellow(req.ip.replace("::ffff:", ""))}`);
+            let ip = (req.header("X-Forwarded-For") && req.header("X-Forwarded-For").split(",")[0]) || req.ip.replace(":ffff:", "");
+
+            console.log(`${chalk.yellow(ip)} requested "${chalk.green(req.baseUrl)}" with method ${chalk.green(req.method)} at the domain ${chalk.blue(req.hostname)} which was referred by ${chalk.blue(req.header("Referer"))}`);
+            console.log(`${chalk.yellowBright("BONUS STALKAGE::::::::")} User logged in as "${user.username}" from ${chalk.yellow(ip)}`);
             next();
         });
 
@@ -113,8 +116,36 @@ export class PageManager {
             res.render("index.njk", {
                 meta: meta,
                 hotreload: this.hotreload,
-                user: req.cookies.discord_token ? await this.getUserData(JSON.parse(req.cookies.discord_token)) : {a:"no log in"}
+                user: req.cookies.discord_token ? await this.getUserData(JSON.parse(req.cookies.discord_token)) : {a:"no log in"},
+                deepuser: req.cookies.discord_token ? WebManager.trimMember(this.guild.members.get((await this.getUserData(JSON.parse(req.cookies.discord_token))).id)) : {a:"no log in"},
             });
+        });
+
+        router.get("/og", (req, res) => {
+            res.contentType("html");
+            res.send(`<!DOCTYPE html>
+            <html>
+            <head>
+                <title>Filehost Domain</title>
+                <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+                <style>
+                    body {
+                        font-family: 'Roboto', sans-serif;
+                    }
+                </style>
+
+                <meta property="og:title" content="Pandentia's Filehost"/>
+                <meta property="og:type" content="website"/>
+                <meta property="og:image" content="https://i.qcx.io/ULAS-J9345492.png"/>
+                <meta property="og:url" content="https://i.qcx.io"/>
+                <meta property="og:description" content="A filehost that Pandentia lets people use if they're nice enough."/>
+            </head>
+            <body>
+                <h1>Filehost Domain</h1>
+                For access, contact Liara#0555 on Discord.<br>
+                If you can't find me, join <a href="https://discord.gg/discord-api" target="_blank">Discord API</a> and try again.
+            </body>
+            </html>`);
         });
 
         router.get("/login", async (req, res) => {

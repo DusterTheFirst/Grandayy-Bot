@@ -10,27 +10,26 @@ import { WebManager } from "./modules/WebManager";
 import { WebhookClient, RichEmbed } from "discord.js";
 
 // CRASH REPORTER
-process.on("exit", a);
-process.on("uncaughtException", a);
-process.on("unhandledRejection", a);
-function a(errororcode: Error | number | String) {
-    console.error(errororcode);
+// process.on("exit", a);
+// process.on("uncaughtException", a);
+// process.on("unhandledRejection", a);
+// function a(errororcode: Error | number | String) {
+//     let message: String = "RobbieBotten Exited";
 
-    let message: String = "RobbieBotten Exited";
-
-    if (errororcode instanceof Error) {
-        message = errororcode.stack;
-    } else if(typeof errororcode === "string" || errororcode instanceof String) {
-        message = errororcode;
-    }
-    new WebhookClient("407690848327958538", "WNr2njzAyONI_-NdcI1NnpXuItfaTR_0B1IZYoL1sY1bdDspv7Umidh-HUdoA8-MydDn")
-        .send(new RichEmbed()
-            .setColor("#f04747")
-            .setTitle("oh noes.")
-            .setDescription(`If you are reading this, all hope is lost\nRobbieBotten has crashed ;-;\n\n*More specifically*: \`\`\`${message}\`\`\``)
-            .setFooter("spam duster till he fixes it")
-            .setTimestamp());
-}
+//     if (errororcode instanceof Error) {
+//         message = errororcode.stack;
+//     } else if(typeof errororcode === "string" || errororcode instanceof String) {
+//         message = errororcode;
+//     }
+//     console.error(message);
+//     new WebhookClient("407690848327958538", "WNr2njzAyONI_-NdcI1NnpXuItfaTR_0B1IZYoL1sY1bdDspv7Umidh-HUdoA8-MydDn")
+//         .send(new RichEmbed()
+//             .setColor("#f04747")
+//             .setTitle("oh noes.")
+//             .setDescription(`If you are reading this, all hope is lost\nRobbieBotten has crashed ;-;\n\n*More specifically*: \`\`\`${message}\`\`\``)
+//             .setFooter("spam duster till he fixes it")
+//             .setTimestamp());
+// }
 
 (async () => {
     const config: Config = eval(`($=>{return ${fs.readFileSync(`${__dirname}/config.json`).toString("utf-8")}})()`);
@@ -72,6 +71,7 @@ function a(errororcode: Error | number | String) {
             default:
                 console.log(context.command && context.command.fullname, context.errorType, context.error);
         }
+        // console.log(context);
     });
 
     client.on("error", (msg) => { console.error(chalk.red(`[Error] ${msg.stack}`)); });

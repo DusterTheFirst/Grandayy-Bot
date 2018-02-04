@@ -12,13 +12,13 @@ module.exports.init = (handler: CommandHandler, database: Database, client: Clie
             context.channel.startTyping();
             let image = context.message.attachments.first() ? context.message.attachments.first() : { url: context.params.get("image url") };
 
-            if (image === undefined || image === {}) {
+            let imageurl = image.url;
+
+            if (!imageurl) {
                 context.channel.send("**Please attach an image, or give a url to an image**");
                 context.channel.stopTyping();
                 return;
             }
-
-            let imageurl = image.url;
 
             let inputtedimage = await Jimp.read(imageurl).catch((reason) => {
                 if (reason instanceof Error && reason.message.includes("no such file or directory,")) context.message.channel.send(`**Invalid URL**`);

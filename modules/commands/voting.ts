@@ -7,13 +7,31 @@ import { isStaff, staffServer } from "./precheck";
 module.exports.init = (handler: CommandHandler, database: Database, client: Client, config: Config) => {
     handler.createGroup("v", (group) => {
         group.setCategory("Voting Commands");
-        group.addCheck(isStaff);
-        group.addCheck(staffServer);
 
 
         group.createCommand("create")
+            .addCheck(isStaff)
+            .addCheck(staffServer)
             .setDescription("Create a staff vote")
             .addParameter("vote", ParameterType.Unparsed)
+            .setCallback((context) => {
+                context.channel.send("no");
+            });
+
+        group.createCommand("list")
+            .addCheck(isStaff)
+            .addCheck(staffServer)
+            .setDescription("List current staff votes")
+            .setCallback((context) => {
+                context.channel.send("no");
+            });
+
+        group.createCommand("vote")
+            .addCheck(isStaff)
+            .addCheck(staffServer)
+            .setDescription("Vote on a vote")
+            .addParameter("id", ParameterType.Required)
+            .addParameter("vote", ParameterType.Required)
             .setCallback((context) => {
                 context.channel.send("no");
             });

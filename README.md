@@ -11,11 +11,11 @@ The bot is created and maintained by [DusterTheFirst](https://github.com/DusterT
 
 ### Webby things™
 
-| Name      | URL                                                |
-| --------- | -------------------------------------------------- |
-| Website   | https://dusterthefirst.ddns.net:8080               |
-| API       | https://dusterthefirst.ddns.net:8080/api           |
-| Endpoints | https://dusterthefirst.ddns.net:8080/api/endpoints |
+| Name      | URL                                            |
+| --------- | ---------------------------------------------- |
+| Website   | https://botten.dusterthefirst.tk               |
+| API       | https://botten.dusterthefirst.tk/api           |
+| Endpoints | https://botten.dusterthefirst.tk/api/endpoints |
 
 ### Discordy things
 

@@ -15,32 +15,33 @@
         {% block js %}
         {% endblock %}
         <!-- Search Engine -->
-        <meta name="description" content="{{meta.description}}">
-        <meta name="image" content="{{meta.icon}}">
+        <meta name="description" content="{{meta.description}}"/>
+        <meta name="image" content="{{meta.icon}}"/>
         <!-- Schema.org for Google -->
-        <meta itemprop="name" content="{{meta.name}}">
-        <meta itemprop="description" content="{{meta.description}}">
-        <meta itemprop="image" content="{{meta.icon}}">
+        <meta itemprop="name" content="{{meta.name}}"/>
+        <meta itemprop="description" content="{{meta.description}}"/>
+        <meta itemprop="image" content="{{meta.icon}}"/>
         <!-- Twitter -->
-        <meta name="twitter:card" content="summary">
-        <meta name="twitter:title" content="{{meta.name}}">
-        <meta name="twitter:description" content="{{meta.description}}">
-        <meta name="twitter:image:src" content="{{meta.icon}}">
-        <meta name="twitter:creator" content="dusterthefirst">
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:title" content="{{meta.name}}"/>
+        <meta name="twitter:description" content="{{meta.description}}"/>
+        <meta name="twitter:image:src" content="{{meta.icon}}"/>
+        <meta name="twitter:creator" content="dusterthefirst"/>
         <!-- Open Graph general (Discord) -->
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="{{meta.url}}">
-        <meta property="og:site_name" content="{{meta.name}}">
-        <meta property="og:title" content="{{meta.name}}">
-        <meta property="og:description" content="{{meta.description}}">
-        <meta property="og:image" content="{{meta.icon}}">
-        <meta property="og:locale" content="en_US">
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content="{{meta.url}}"/>
+        <meta property="og:site_name" content="{{meta.name}}"/>
+        <meta property="og:title" content="{{meta.name}}"/>
+        <meta property="og:description" content="{{meta.description}}"/>
+        <meta property="og:image" content="{{meta.icon}}"/>
+        <meta property="og:locale" content="en_US"/>
         {{hotreload | safe}}
     </head>
     <body>
         <header>
             <a href="/login">loginbutcool</a>
-            <a href="/logout">logout but cooler</a>
+            <a href="/logout">logout but cooler</a><br>
+            <button onclick="history.pushState('object or string representing the state of the page', 'new title', '/you/actually/never/left/the/main/page/but/the/pages/url/has/changed/and/this/is/cool.woah/dont/refresh/tho/cause/this/file/dont/actually/exist');">doabamboozle</button>
         </header>
         <div class="page">
             {% block body %}

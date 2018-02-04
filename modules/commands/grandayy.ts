@@ -12,13 +12,13 @@ module.exports.init = (handler: CommandHandler, databaseL: Database, client: Cli
             context.channel.startTyping();
             let image = context.message.attachments.first() || { url: context.params.get("image url")};
 
-            if (image.url === undefined) {
+            let imageurl = image.url;
+
+            if (!imageurl) {
                 context.message.channel.send("**Please attach an image, or give a url to an image**");
                 context.channel.stopTyping();
                 return;
             }
-
-            let imageurl = image.url;
 
             let watermark = await Jimp.read(`${__dirname}/res/watermark.png`);
             watermark = watermark.opacity(.75);
