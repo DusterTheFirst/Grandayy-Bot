@@ -1,19 +1,58 @@
+@font-face {
+    font-family: "Quicksand";
+    font-style: normal;
+    font-weight: 500;
+    src: local("Quicksand Medium"), local("Quicksand-Medium"), url("https://fonts.gstatic.com/s/quicksand/v7/FRGja7LlrG1Mypm0hCq0Dugdm0LZdjqr5-oayXSOefg.woff2") format("woff2");
+    unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+
 body, html {
     margin: 0;
     padding: 0;
     width: 100%;
+    font-family: "Quicksand";
 }
 
 header {
-    display: block;
-    background: red;
+    z-index: 100;
     position: fixed;
-    height: 100px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3em;
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid #e7e7e7;
+        background-color: #f3f3f3;
+        li {
+            float: left;
+            &.right {
+                float: right;
+            }
+            a {
+                display: block;
+                color: #666;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+                &:hover:not(.active) {
+                    background-color: #ddd;
+                }
+                &.active {
+                    color: white;
+                    background-color: #4CAF50;
+                }
+            }
+        }
+    }
 }
 
 body {
     .page {
-        padding-top: 100px;
+        padding-top: 3em;
         background: yellow;
     }
 }

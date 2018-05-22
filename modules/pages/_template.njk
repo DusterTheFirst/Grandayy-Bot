@@ -36,12 +36,30 @@
         <meta property="og:image" content="{{meta.icon}}"/>
         <meta property="og:locale" content="en_US"/>
         {{hotreload | safe}}
+
+        
+        {% macro page(name, url='') %}
+        <li>
+            <a href="{{url}}">{{name}}</a>
+        </li>
+        {% endmacro %}
     </head>
     <body>
         <header>
-            <a href="/login">loginbutcool</a>
-            <a href="/logout">logout but cooler</a><br>
-            <button onclick="history.pushState('object or string representing the state of the page', 'new title', '/you/actually/never/left/the/main/page/but/the/pages/url/has/changed/and/this/is/cool.woah/dont/refresh/tho/cause/this/file/dont/actually/exist');">doabamboozle</button>
+            <ul>
+                {{ page('Home', '/') }}
+                {{ page('Home', '/') }}
+                {% if templateData.user %}
+                <li class="right">
+                    <a href="/logout">Logout</a>
+                </li>
+                {% else %}
+                <li class="right">
+                    <a href="/login">Login</a>
+                </li>
+                {% endif %}
+            </ul>
+            <!-- <button onclick="history.pushState('object or string representing the state of the page', 'new title', '/you/actually/never/left/the/main/page/but/the/pages/url/has/changed/and/this/is/cool.woah/dont/refresh/tho/cause/this/file/dont/actually/exist');">doabamboozle</button> -->
         </header>
         <div class="page">
             {% block body %}

@@ -12,7 +12,7 @@
             "identifier": "Web",
             "label": "Web",
             "tsconfig": "modules\\pages\\tsconfig.json",
-            "option": "watch",            
+            "option": "watch",
             "problemMatcher": [
                 "$tsc-watch"
             ]
@@ -30,6 +30,13 @@
             "problemMatcher": [
                 "$tsc-watch"
             ]
+        },
+        {
+            "type": "shell",
+            "command": "node-sass -w ./src/pages/ -o ./src/pages/ --output-style compressed --error-bell",
+            "label": "SCSS",
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }

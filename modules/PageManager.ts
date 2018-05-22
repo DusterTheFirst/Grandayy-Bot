@@ -1,5 +1,5 @@
 import { Database } from "sqlite";
-import { Client, Guild } from "discord.js";
+import { Client, Guild, User } from "discord.js";
 import { Router, Application, Request, Response, NextFunction } from "express";
 import * as nunjucks from "nunjucks";
 import * as ws from "ws";
@@ -13,7 +13,7 @@ import chalk from "chalk";
 import * as sass from "node-sass";
 import * as querystring from "querystring";
 import { OAuthCodeExpiredError } from "./Error";
-import { WebManager } from "./WebManager";
+import { WebManager, TrimmedMember } from "./WebManager";
 
 export class PageManager {
     public router: Router;
@@ -35,17 +35,17 @@ export class PageManager {
         });
 
 
-        let sassfiles = fs.readdirSync("./modules/pages/sass");
-        for (let sfile of sassfiles) {
-            if (sfile.includes(".css")) continue;
-            try {
-                let newfile = sass.renderSync({
-                    file: `./modules/pages/sass/${sfile}`,
-                    outputStyle: "compressed"
-                });
-                fs.writeFileSync(`./modules/pages/sass/${sfile.replace(/.scss$/, ".css")}`, newfile.css);
-            } catch { }
-        }
+        // let sassfiles = fs.readdirSync("./modules/pages/sass");
+        // for (let sfile of sassfiles) {
+        //     if (sfile.includes(".css")) continue;
+        //     try {
+        //         let newfile = sass.renderSync({
+        //             file: `./modules/pages/sass/${sfile}`,
+        //             outputStyle: "compressed"
+        //         });
+        //         fs.writeFileSync(`./modules/pages/sass/${sfile.replace(/.scss$/, ".css")}`, newfile.css);
+        //     } catch { }
+        // }
 
         if (this.devmode) {
             this.hotreload = `<script src="/scripts/hotreload.js"></script>`;
@@ -59,22 +59,24 @@ export class PageManager {
             }).on("change", (e, file: String) => {
                 if (file.includes(".scss") || file.includes(".ts")) return;
                 hotreloadwss.clients.forEach((wsocket) => {
-                    if (wsocket.readyState = ws.OPEN)
+                    if (wsocket.readyState === ws.OPEN)
                         wsocket.send(file);
                 });
                 console.log(`${chalk.yellow(file.toString())} edited, ${chalk.red("reloading all local connections")}`);
             });
-            fs.watch("./modules/pages/sass", { recursive: true, }, (e, file) => {
-                if (file.includes(".css")) return;
-                try {
-                    let newfile = sass.renderSync({
-                        file: `./modules/pages/sass/${file}`,
-                        outputStyle: "compressed"
-                    });
-                    fs.writeFileSync(`./modules/pages/sass/${file.replace(/.scss$/, ".css")}`, newfile.css);
-                    console.log(`${chalk.yellow(file.toString())} edited, ${chalk.red("compiling into css")}`);
-                } finally { }
-            });
+            // fs.watch("./modules/pages/sass", { recursive: true, }, (e, file) => {
+            //     if (file.includes(".css")) return;
+            //         setTimeout(() => {
+            //             try {
+            //                 let newfile = sass.renderSync({
+            //                     file: `./modules/pages/sass/${file}`,
+            //                     outputStyle: "compressed"
+            //                 });
+            //                 fs.writeFileSync(`./modules/pages/sass/${file.replace(/.scss$/, ".css")}`, newfile.css);
+            //                 console.log(`${chalk.yellow(file.toString())} edited, ${chalk.red("compiling into css")}`);
+            //             } catch { }
+            //         }, 200);
+            // });
         }
 
         nunjucks.configure("./modules/pages", {
@@ -96,85 +98,35 @@ export class PageManager {
                         verified: false
                     };
 
-            let ip = (req.header("X-Forwarded-For") && req.header("X-Forwarded-For").split(",")[0]) || req.ip.replace(":ffff:", "");
+            let ip = req.header("X-Forwarded-For") || req.ip.replace(":ffff:", "");
 
-            console.log(`${chalk.yellow(ip)} requested "${chalk.green(req.baseUrl)}" with method ${chalk.green(req.method)} at the domain ${chalk.blue(req.hostname)} which was referred by ${chalk.blue(req.header("Referer"))}`);
-            console.log(`${chalk.yellowBright("BONUS STALKAGE::::::::")} User logged in as "${user.username}" from ${chalk.yellow(ip)}`);
+            console.log(`${chalk.yellow(user.username)}||${chalk.red(ip)} requested "${chalk.green(req.baseUrl)}" with method ${chalk.green(req.method)} at the domain ${chalk.blue(req.hostname)} which was referred by ${chalk.blue(req.header("Referer"))}`);
             next();
         });
 
         router.get("/", async (req, res) => {
-            if (req.cookies && req.cookies.discord_token)
-                console.log(await this.getUserData(JSON.parse(req.cookies.discord_token)));
-
             let meta: PageMeta = {
-                description: "The great Grandayy discord server",
-                icon: "http://greensportsalliance.org/images/lightGreenSquare.gif",
+                description: "The website for Grandayy's Discord server",
+                icon: "https://botten.dusterthefirst.tk/images/servericon.png",
                 name: "Grandayy's Discord Server",
-                url: "https://google.com"
+                url: "https://botten.dusterthefirst.tk"
             };
             res.render("index.njk", {
                 meta: meta,
                 hotreload: this.hotreload,
-                user: req.cookies.discord_token ? await this.getUserData(JSON.parse(req.cookies.discord_token)) : {a:"no log in"},
-                deepuser: req.cookies.discord_token ? WebManager.trimMember(this.guild.members.get((await this.getUserData(JSON.parse(req.cookies.discord_token))).id)) : {a:"no log in"},
+                templateData: await this.getTemplateInfo(req)
             });
         });
 
-        router.get("/og", (req, res) => {
-            res.contentType("html");
-            res.send(`<!DOCTYPE html>
-            <html>
-            <head>
-                <title>Filehost Domain</title>
-                <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-                <style>
-                    body {
-                        font-family: 'Roboto', sans-serif;
-                    }
-                </style>
 
-                <meta property="og:title" content="Pandentia's Filehost"/>
-                <meta property="og:type" content="website"/>
-                <meta property="og:image" content="https://i.qcx.io/ULAS-J9345492.png"/>
-                <meta property="og:url" content="https://i.qcx.io"/>
-                <meta property="og:description" content="A filehost that Pandentia lets people use if they're nice enough."/>
-            </head>
-            <body>
-                <h1>Filehost Domain</h1>
-                For access, contact Liara#0555 on Discord.<br>
-                If you can't find me, join <a href="https://discord.gg/discord-api" target="_blank">Discord API</a> and try again.
-            </body>
-            </html>`);
-        });
+        // router.get("/users/:searchterm");
 
-        router.get("/login", async (req, res) => {
-            if (!req.query.code) {
-                res.redirect("https://discordapp.com/oauth2/authorize?response_type=code&client_id=307231810218360832&scope=identify&state=yourcurrentpathorsomethingcool&redirect_uri=https://dusterthefirst.ddns.net:8080/login");
-                return;
-            }
+        // router.get("/user/:id", (req, res) => {
+        //     let id = req.params.id;
 
-            let token = await this.getToken(req.query.code).catch();
-
-            if (token) {
-                res.cookie("discord_token", JSON.stringify(token), { expires: new Date(token.expiration) });
-            }
-            res.redirect("/");
-        });
-
-        router.get("/logout", (req, res) => {
-            res.clearCookie("discord_token");
-            res.redirect("/");
-        });
-
-        router.get("/users/:searchterm");
-
-        router.get("/user/:id", (req, res) => {
-            let id = req.params.id;
-
-            res.contentType("html");
-            res.send(id);
-        });
+        //     res.contentType("html");
+        //     res.send(id);
+        // });
 
         router.get("/scripts/:filename", (req, res) => {
             res.contentType("js");
@@ -202,10 +154,40 @@ export class PageManager {
             else
                 res.sendStatus(404);
         });
+        router.get("/images/:filename", (req, res) => {
+            res.contentType("png");
+            let filename = req.params.filename as string;
+            let filepath = `./modules/pages/images/${filename}`;
+            if (fs.existsSync(filepath))
+                res.send(fs.readFileSync(filepath));
+            else
+                res.sendStatus(404);
+        });
+
 
         router.use("/join", (req, res) => res.redirect("https://discordapp.com/invite/3sDeWSS"));
 
-        router.use("/throw", () => { throw "error"; });
+        router.get("/login", async (req, res) => {
+            let hostname = req.hostname === "localhost" ? `${req.hostname}:8080` : req.hostname;
+            let redirect_uri = `${req.protocol}://${hostname}/login`;
+
+            if (!req.query.code) {
+                res.redirect(`https://discordapp.com/oauth2/authorize?response_type=code&client_id=307231810218360832&scope=identify&state=yourcurrentpathorsomethingcool&redirect_uri=${redirect_uri}`);
+                return;
+            }
+
+            let token = await this.getToken(req.query.code, redirect_uri).catch(console.log);
+
+            if (token) {
+                res.cookie("discord_token", JSON.stringify(token), { expires: new Date(token.expiration) });
+            }
+            res.redirect("/");
+        });
+
+        router.get("/logout", (req, res) => {
+            res.clearCookie("discord_token");
+            res.redirect("/");
+        });
 
         router.use("*", (req, res) => this.send404(req, res));
         router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
@@ -224,8 +206,31 @@ export class PageManager {
         res.render("404.njk", {
             meta: meta,
             hotreload: this.hotreload,
-            page: path.basename(url.parse(req.baseUrl).path)
+            page: url.parse(req.baseUrl).path
         });
+    }
+
+    private async getTemplateInfo(req: Request): Promise<TemplateInfo> {
+        let currentPage = req.baseUrl;
+
+        if (req.cookies.discord_token) {
+            let discordToken = JSON.parse(req.cookies.discord_token);
+
+            let smallUser = await this.getUserData(discordToken);
+
+            let guildMember = await this.guild.fetchMember(smallUser.id);
+
+            let trimmed = WebManager.trimMember(guildMember);
+            return {
+                user: trimmed,
+                currentPage
+            };
+        } else {
+            return {
+                user: null,
+                currentPage
+            };
+        }
     }
 
     private async getUserData(token: OAuth): Promise<OAuthUser> {
@@ -296,14 +301,14 @@ export class PageManager {
         });
     }
 
-    private async getToken(code: string): Promise<OAuth> {
+    private async getToken(code: string, redirect_uri: string): Promise<OAuth> {
         return new Promise<OAuth>((resolve, reject) => {
             let data = {
                 client_id: "307231810218360832",
                 client_secret: this.config.clientsecret,
                 grant_type: "authorization_code",
-                code: code,
-                redirect_uri: "https://dusterthefirst.ddns.net:8080/login"
+                code,
+                redirect_uri
             };
             let request = https.request({
                 host: "discordapp.com",
@@ -321,6 +326,7 @@ export class PageManager {
                     let body = Buffer.concat(chunks).toString();
                     let got = JSON.parse(body);
                     if (got.error) {
+                        console.error(got);
                         reject(new OAuthCodeExpiredError());
                     } else {
                         got.expiration = new Date(Date.now() + (got.expires_in * 1000));
@@ -333,6 +339,11 @@ export class PageManager {
             request.end();
         });
     }
+}
+
+interface TemplateInfo {
+    user: TrimmedMember;
+    currentPage: string;
 }
 
 interface OAuthUser {

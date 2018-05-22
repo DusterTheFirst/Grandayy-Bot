@@ -1,5 +1,4 @@
-console.log(location.protocol);
-if (window.location.protocol === "http") {
+if (window.location.protocol === "http:") {
     let socket = new WebSocket("ws://localhost:6969", "jeffery");
     socket.onmessage = (event) => {
         window.location.reload();

@@ -89,7 +89,7 @@ import { WebhookClient, RichEmbed } from "discord.js";
         ];
         setInterval(() => {
             let i = Math.floor(Math.random() * (statuses.length - 1));
-            let game = statuses[i].replace(/{users}/g, client.guilds.get(config.guild).memberCount.toString());
+            let game = statuses[i].replace(/{users}/g, client.guilds.get(config.guild) && client.guilds.get(config.guild).memberCount.toString());
             client.user.setGame(game);
         }, 60000);
         // client.user.setGame("-help"/*, "https://www.twitch.tv/dusterthefirst" */);

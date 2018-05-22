@@ -5,7 +5,7 @@ import * as http from "http";
 import * as helmet from "helmet";
 import * as fs from "fs";
 import * as bodyParser from "body-parser";
-let proxy: (url: string, options: any) => any = require("express-http-proxy");
+// let proxy: (url: string, options: any) => any = require("express-http-proxy");
 import { NextFunction, Response, Request, Router, Application } from "express";
 import { Database } from "sqlite";
 

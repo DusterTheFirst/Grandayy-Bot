@@ -1,4 +1,4 @@
-import { Client, TextChannel, Guild, GuildMember, Role } from "discord.js";
+import { Client, TextChannel, Guild, GuildMember, Role, Presence } from "discord.js";
 import { Database } from "sqlite";
 import * as express from "express";
 import { Application, Router } from "express";
@@ -43,24 +43,23 @@ export class WebManager {
         this.pages = new PageManager(this.app, Router(), client, config, database);
         this.api = new ApiManager(this.app, Router(), client, config, database);
 
-
-        this.app.get("/.well-known/acme-challenge/zUle5wo-OX74O1plRXX05r1grSKbt5EGRzfEixkKk5E", (req, res) => {
-            res.send("zUle5wo-OX74O1plRXX05r1grSKbt5EGRzfEixkKk5E.seWQr1fo_yrUrywe8x58ENDvOmypLtvDGRTTr21-uHY");
-        });
-        this.app.get("/.well-known/acme-challenge/6kOFThmLJw4hmU3nwsnHlFmbGtOLRmLC6vdYqGQRcjc", (req, res) => {
-            res.send("6kOFThmLJw4hmU3nwsnHlFmbGtOLRmLC6vdYqGQRcjc.seWQr1fo_yrUrywe8x58ENDvOmypLtvDGRTTr21-uHY");
-        });
+        // this.app.get("/.well-known/acme-challenge/zUle5wo-OX74O1plRXX05r1grSKbt5EGRzfEixkKk5E", (req, res) => {
+        //     res.send("zUle5wo-OX74O1plRXX05r1grSKbt5EGRzfEixkKk5E.seWQr1fo_yrUrywe8x58ENDvOmypLtvDGRTTr21-uHY");
+        // });
+        // this.app.get("/.well-known/acme-challenge/6kOFThmLJw4hmU3nwsnHlFmbGtOLRmLC6vdYqGQRcjc", (req, res) => {
+        //     res.send("6kOFThmLJw4hmU3nwsnHlFmbGtOLRmLC6vdYqGQRcjc.seWQr1fo_yrUrywe8x58ENDvOmypLtvDGRTTr21-uHY");
+        // });
 
         this.app.use("/", this.pages.router);
         this.app.use("/api", this.api.router);
 
         client.on("ready", () => {
-            this.api.feedbackchannel = <TextChannel>client.channels.find("id", config.feedbackchannel);
+            this.api.feedbackchannel = client.channels.find("id", config.feedbackchannel) as TextChannel;
         });
         this.app.listen(8080);
     }
 
-    public static trimRole(role: Role) {
+    public static trimRole(role: Role): TrimmedRole {
         if (!role)
             return null;
 
@@ -73,12 +72,12 @@ export class WebManager {
         };
     }
 
-    public static trimMember(member: GuildMember) {
+    public static trimMember(member: GuildMember): TrimmedMember {
         if (!member)
             return null;
 
         let userLevel = "0";
-        let levelColor = undefined;
+        let levelColor: string = undefined;
         for (let level of Object.keys(this.config.levels).reverse()) {
             if (member.roles.array().map(x => x.id).includes(this.config.levels[level])) {
                 userLevel = level;
@@ -114,7 +113,7 @@ export class WebManager {
             hoistRole: member.hoistRole ? member.hoistRole.id : undefined,
             id: member.id,
             joined: member.joinedAt.getTime(),
-            level: userLevel,
+            level: parseInt(userLevel),
             levelColor: levelColor,
             nickname: member.nickname,
             presence: member.presence,
@@ -125,7 +124,7 @@ export class WebManager {
         };
     }
 
-    public static trimGuild(guild: Guild) {
+    public static trimGuild(guild: Guild): TrimmedGuild {
         if (!guild)
             return null;
 
@@ -140,4 +139,45 @@ export class WebManager {
         };
     }
 
+}
+
+
+export interface TrimmedRole {
+    color: number;
+    hexColor: string;
+    hoist: boolean;
+    id: string;
+    name: string;
+}
+
+export interface TrimmedMember {
+    avatar: string;
+    bot: boolean;
+    color: number;
+    colorHex: string;
+    created: number;
+    discriminator: string;
+    displayName: string;
+    displayStatus: string;
+    highestRole: string;
+    hoistRole: string;
+    id: string;
+    joined: number;
+    level: number;
+    levelColor: string;
+    nickname: string;
+    presence: Presence;
+    roles: TrimmedRole[];
+    statuses: string[];
+    tag: string;
+    username: string;
+}
+
+export interface TrimmedGuild {
+    createdAt: number;
+    icon: string;
+    id: string;
+    membercount: number;
+    name: string;
+    region: string;
 }
